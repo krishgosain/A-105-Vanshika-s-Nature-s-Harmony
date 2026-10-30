@@ -153,7 +153,7 @@ h1 em { font-style: italic; color: var(--gold); }
 </aside>
 
 <section id="intro">
-  <div class="slide on" style="background-image:url(img/hero_living.jpg)"></div>
+  <div class="slide on" style="background-image:url(img/hero_living.jpg?v=3)"></div>
   <div class="slide" style="background-image:url(img/hero_dining.jpg)"></div>
   <div class="slide" style="background-image:url(img/hero_master.jpg)"></div>
   <div class="slide" style="background-image:url(img/hero_kitchen.jpg)"></div>
@@ -240,7 +240,8 @@ function tex(url) {
   }, undefined, rej));
   return cache[url];
 }
-const small = id => `pano/${id}_s.jpg`, big = id => `pano/${id}.jpg`;
+const V = "?v=3";
+const small = id => `pano/${id}_s.jpg${V}`, big = id => `pano/${id}.jpg${V}`;
 
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 85 : 72; camera.updateProjectionMatrix(); fovBase = camera.fov; }
 let fovBase = 72; addEventListener("resize", resize); resize();

@@ -104,8 +104,8 @@ const go = document.getElementById("go");
 const draco = new DRACOLoader(); draco.setDecoderPath("lib/draco/");
 const gl = new GLTFLoader(); gl.setDRACOLoader(draco);
 Promise.all([
-  fetch("model/layout.json").then(r => r.json()),
-  new Promise((res, rej) => gl.load("model/a105.glb", res, ev => { if (ev.total) go.textContent = `Loading the home… ${Math.round(100 * ev.loaded / ev.total)}%`; }, rej))
+  fetch("model/layout.json?v=3").then(r => r.json()),
+  new Promise((res, rej) => gl.load("model/a105.glb?v=3", res, ev => { if (ev.total) go.textContent = `Loading the home… ${Math.round(100 * ev.loaded / ev.total)}%`; }, rej))
 ]).then(([lay, gltf]) => {
   colliders = lay.colliders; rooms = lay.rooms;
   gltf.scene.traverse(o => {
