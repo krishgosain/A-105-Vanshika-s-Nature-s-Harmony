@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A-105 Walkthrough</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: full-bleed 3D canvas; HUD pinned to corners; start card centred over a dimmed view. */
+:root {
+  --ink: #f3ede4;          /* warm off-white text */
+  --ink-dim: #b8ad9e;
+  --night: #15120f;        /* charcoal with a bronze bias, like the TV-wall wallpaper */
+  --glass: rgba(24, 20, 16, 0.72);
+  --brass: #d4a35b;        /* LED-strip warmth */
+  --line: rgba(243, 237, 228, 0.16);
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--night); color: var(--ink); font-family: var(--display); overflow: hidden; touch-action: none; }
+#view { position: fixed; inset: 0; display: block; width: 100%; height: 100%; }
+.hud { position: fixed; pointer-events: none; z-index: 5; }
+#room {
+  top: calc(16px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+  background: var(--glass); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); min-width: 0; max-width: calc(100vw - 32px);
+}
+#room .name { font-weight: 600; font-size: 1.05rem; letter-spacing: 0.01em; }
+#room .size { font-family: var(--mono); font-size: 0.75rem; color: var(--brass); margin-top: 2px; }
+#map {
+  right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: min(34vw, 300px); aspect-ratio: 1400 / 810; max-width: 100%;
+  border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--glass);
+}
+#map img { width: 100%; height: 100%; display: block; opacity: 0.92; }
+#dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 0 3px rgba(212,163,91,0.35); }
+#cone { position: absolute; width: 0; height: 0; margin: -18px 0 0 -9px; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 18px solid rgba(212,163,91,0.55); transform-origin: 9px 18px; }
+#jump {
+  pointer-events: auto; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-wrap: wrap; gap: 6px; max-width: min(56vw, 520px);
+}
+#jump button, .btn {
+  font: 600 0.78rem var(--display); color: var(--ink); background: var(--glass); border: 1px solid var(--line);
+  border-radius: 999px; padding: 7px 12px; cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+#jump button:hover, #jump button:focus-visible { border-color: var(--brass); outline: none; color: #fff; }
+#help { top: calc(16px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); font-family: var(--mono); font-size: 0.7rem; color: var(--ink-dim); text-align: right; line-height: 1.6; background: var(--glass); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+#start {
+  position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: radial-gradient(ellipse at 50% 40%, rgba(21,18,15,0.55), rgba(21,18,15,0.92));
+}
+.card { max-width: 520px; width: 100%; display: grid; gap: 14px; }
+.eyebrow { font: 600 0.72rem var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
+h1 { margin: 0; font-weight: 800; font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 0.95; letter-spacing: -0.02em; text-wrap: balance; }
+.sub { color: var(--ink-dim); font-size: 1rem; line-height: 1.5; max-width: 46ch; }
+.specs { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--mono); font-size: 0.75rem; }
+.specs span { border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+#go { justify-self: start; font-size: 1rem; padding: 12px 22px; background: var(--brass); color: #1b140c; border-color: transparent; }
+#go:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+#go[disabled] { opacity: 0.6; cursor: progress; }
+.keys { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-dim); line-height: 1.7; }
+#stick { position: fixed; z-index: 6; width: 110px; height: 110px; border-radius: 50%; border: 1px solid var(--line); background: rgba(24,20,16,0.4); display: none; pointer-events: none; }
+#knob { position: absolute; left: 35px; top: 35px; width: 40px; height: 40px; border-radius: 50%; background: rgba(212,163,91,0.7); }
+@media (max-width: 640px) { #help { display: none; } #map { width: 44vw; } #jump { max-width: 50vw; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+
+<canvas id="view" aria-label="First-person view of flat A-105"></canvas>
+
+<div id="room" class="hud" aria-live="polite"><div class="name">Entrance</div><div class="size">Flat A-105</div></div>
+<div id="help" class="hud">WASD / arrows &middot; move<br>mouse &middot; look &middot; Shift &middot; walk faster<br>Esc &middot; release mouse</div>
+<div id="map" class="hud"><img id="mapimg" src="minimap.png" alt="Top-down plan of A-105 showing your position"><div id="cone"></div><div id="dot"></div></div>
+<div id="jump" class="hud" aria-label="Jump to a room"></div>
+<div id="stick"><div id="knob"></div></div>
+
+<div id="start">
+  <div class="card">
+    <div class="eyebrow">Vanshika's Nature's Harmony &middot; Bengaluru</div>
+    <h1>Flat A-105</h1>
+    <div class="sub">A walkable model of the Type 5 unit, built from the published floor plan and the sample-flat walkthrough video. Start at the front door and explore every room.</div>
+    <div class="specs"><span>3BHK + Family</span><span>2,011 sq ft saleable</span><span>3 balconies</span><span>3 toilets</span></div>
+    <button id="go" class="btn" disabled>Loading model…</button>
+    <div class="keys" id="keys">Desktop: click to look around, WASD to walk, Shift to walk faster.<br>Phone: drag the left half to walk, the right half to look.</div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const SIZES = {
+  "Living": "11.98 x 13.45 ft", "Family & Dining": "20.87 x 11.48 ft", "Foyer": "9.35 x 7.81 ft",
+  "Kitchen": "9.35 x 7.61 ft", "Utility": "8.83 x 3.94 ft", "Bedroom 2": "10.99 x 12.12 ft",
+  "Bedroom 3": "11.32 x 13.12 ft", "Master Bedroom": "13.45 x 11.48 ft", "Toilet 1": "7.87 x 4.92 ft",
+  "Toilet 2": "4.92 x 8.86 ft", "Toilet 3": "4.92 x 7.87 ft", "Balcony": "19.55 x 3.28 ft",
+  "Bedroom 2 Balcony": "10.99 x 3.28 ft", "Master Balcony": "5.05 x 5.12 ft", "Entrance": "Outside the front door"
+};
+const JUMPS = [["Entrance", 1250, 522, 180], ["Living", 840, 450, 140], ["Dining", 700, 560, 235], ["Kitchen", 960, 650, 0],
+  ["Bedroom 2", 1090, 360, 20], ["Bedroom 3", 610, 380, 165], ["Master", 330, 520, 165], ["Balcony", 640, 118, 90]];
+
+const canvas = document.getElementById("view");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcfe0ea);
+scene.fog = new THREE.Fog(0xcfe0ea, 30, 90);
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environment = envTex;
+const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 200);
+
+scene.add(new THREE.HemisphereLight(0xfff3e2, 0x9a8f80, 1.35));
+const sun = new THREE.DirectionalLight(0xfff1dc, 1.6); sun.position.set(-6, 14, -12); scene.add(sun);
+
+let layout, colliders = [], rooms = {};
+const S = 74;
+const px2x = px => (px - 45) / S, py2y = py => -(py - 160) / S;
+const player = { x: 0, y: 0, yaw: Math.PI, pitch: 0, eye: 1.58, r: 0.22 };
+
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize); resize();
+
+const go = document.getElementById("go");
+Promise.all([
+  fetch("layout.json").then(r => r.json()),
+  new Promise((res, rej) => new GLTFLoader().load("a105.json", res, ev => {
+    if (ev.total) go.textContent = `Loading model… ${Math.round(100 * ev.loaded / ev.total)}%`;
+  }, rej))
+]).then(([lay, gltf]) => {
+  layout = lay; colliders = lay.colliders; rooms = lay.rooms;
+  gltf.scene.traverse(o => {
+    if (o.isMesh) {
+      const m = o.material;
+      if (m) {
+        m.envMapIntensity = /mirror|steel|copper|black_gloss|white_gloss|floor_tile|marble|screen|glass/.test(m.name) ? 1.0 : 0.35;
+        if (/glass|sheer/.test(m.name)) { m.depthWrite = false; m.side = THREE.DoubleSide; }
+        if (/^led/.test(m.name)) { m.emissiveIntensity = 2.5; m.toneMapped = false; }
+      }
+    }
+  });
+  scene.add(gltf.scene);
+  // warm downlights: a handful of real lights, the rest are emissive discs
+  const pick = [0, 1, 4, 5, 6, 8, 10, 12, 15, 17, 18, 21];
+  for (const i of pick) {
+    const [x, y] = lay.lights[i]; const L = new THREE.PointLight(0xffd8a8, 2.4, 6.5, 2);
+    L.position.set(x, lay.ceiling - 0.25, -y); scene.add(L);
+  }
+  teleport(JUMPS[0]);
+  go.disabled = false; go.textContent = "Enter the flat";
+  buildJumps();
+}).catch(err => { go.textContent = "The model didn't load. Reload the page to try again."; console.error(err); });
+
+function teleport([name, px, py, yawDeg]) { player.x = px2x(px); player.y = py2y(py); player.yaw = yawDeg * Math.PI / 180; player.pitch = 0; }
+function buildJumps() {
+  const box = document.getElementById("jump");
+  for (const j of JUMPS) {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = j[0];
+    b.addEventListener("click", e => { e.stopPropagation(); teleport(j); });
+    box.appendChild(b);
+  }
+}
+
+// ---------------------------------------------------------------- input
+const keys = new Set();
+addEventListener("keydown", e => { keys.add(e.code); if (e.code.startsWith("Arrow")) e.preventDefault(); });
+addEventListener("keyup", e => keys.delete(e.code));
+let locked = false;
+const start = document.getElementById("start");
+go.addEventListener("click", () => {
+  start.hidden = true;
+  if (!isTouch) { try { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+});
+canvas.addEventListener("click", () => { if (!isTouch && !locked) { try { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {} } });
+document.addEventListener("pointerlockchange", () => { locked = document.pointerLockElement === canvas; });
+let dragLook = null;
+addEventListener("mousemove", e => {
+  if (locked) look(e.movementX, e.movementY);
+  else if (dragLook && !isTouch) { look(e.clientX - dragLook.x, e.clientY - dragLook.y); dragLook = { x: e.clientX, y: e.clientY }; }
+});
+canvas.addEventListener("mousedown", e => { if (!locked) dragLook = { x: e.clientX, y: e.clientY }; });
+addEventListener("mouseup", () => dragLook = null);
+function look(dx, dy) {
+  player.yaw -= dx * 0.0024; player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch - dy * 0.0024));
+}
+// touch: left half = joystick, right half = look
+const isTouch = matchMedia("(pointer: coarse)").matches;
+const stick = document.getElementById("stick"), knob = document.getElementById("knob");
+let moveTouch = null, lookTouch = null, joy = { x: 0, y: 0 };
+canvas.addEventListener("touchstart", e => {
+  for (const t of e.changedTouches) {
+    if (t.clientX < innerWidth / 2 && !moveTouch) {
+      moveTouch = { id: t.identifier, x: t.clientX, y: t.clientY };
+      stick.style.display = "block"; stick.style.left = (t.clientX - 55) + "px"; stick.style.top = (t.clientY - 55) + "px";
+    } else if (!lookTouch) lookTouch = { id: t.identifier, x: t.clientX, y: t.clientY };
+  }
+}, { passive: true });
+canvas.addEventListener("touchmove", e => {
+  for (const t of e.changedTouches) {
+    if (moveTouch && t.identifier === moveTouch.id) {
+      let dx = t.clientX - moveTouch.x, dy = t.clientY - moveTouch.y; const d = Math.hypot(dx, dy), m = 45;
+      if (d > m) { dx *= m / d; dy *= m / d; }
+      joy = { x: dx / m, y: dy / m }; knob.style.left = (35 + dx) + "px"; knob.style.top = (35 + dy) + "px";
+    } else if (lookTouch && t.identifier === lookTouch.id) {
+      look((t.clientX - lookTouch.x) * 1.6, (t.clientY - lookTouch.y) * 1.6); lookTouch.x = t.clientX; lookTouch.y = t.clientY;
+    }
+  }
+}, { passive: true });
+function endTouch(e) {
+  for (const t of e.changedTouches) {
+    if (moveTouch && t.identifier === moveTouch.id) { moveTouch = null; joy = { x: 0, y: 0 }; stick.style.display = "none"; knob.style.left = knob.style.top = "35px"; }
+    if (lookTouch && t.identifier === lookTouch.id) lookTouch = null;
+  }
+}
+canvas.addEventListener("touchend", endTouch); canvas.addEventListener("touchcancel", endTouch);
+if (isTouch) document.getElementById("keys").textContent = "Drag the left half of the screen to walk and the right half to look around.";
+
+// ---------------------------------------------------------------- collision (circle vs plan rectangles, metres)
+function blocked(x, y) {
+  const r = player.r;
+  for (const c of colliders) {
+    const x0 = Math.min(c[0], c[2]), x1 = Math.max(c[0], c[2]), y0 = Math.min(c[1], c[3]), y1 = Math.max(c[1], c[3]);
+    const cx = Math.max(x0, Math.min(x, x1)), cy = Math.max(y0, Math.min(y, y1));
+    if ((x - cx) ** 2 + (y - cy) ** 2 < r * r) return true;
+  }
+  return false;
+}
+function roomAt(x, y) {
+  for (const [name, c] of Object.entries(rooms)) {
+    const x0 = Math.min(c[0], c[2]), x1 = Math.max(c[0], c[2]), y0 = Math.min(c[1], c[3]), y1 = Math.max(c[1], c[3]);
+    if (x >= x0 && x <= x1 && y >= y0 && y <= y1) return name;
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------- loop
+const roomEl = document.querySelector("#room .name"), sizeEl = document.querySelector("#room .size");
+const dot = document.getElementById("dot"), cone = document.getElementById("cone"), mapEl = document.getElementById("map");
+let last = performance.now(), lastRoom = "", bob = 0;
+function tick(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (layout) {
+    let f = 0, s = 0;
+    if (keys.has("KeyW") || keys.has("ArrowUp")) f += 1;
+    if (keys.has("KeyS") || keys.has("ArrowDown")) f -= 1;
+    if (keys.has("KeyA")) s -= 1;
+    if (keys.has("KeyD")) s += 1;
+    if (keys.has("ArrowLeft")) player.yaw += 1.8 * dt;
+    if (keys.has("ArrowRight")) player.yaw -= 1.8 * dt;
+    f -= joy.y; s += joy.x;
+    const len = Math.hypot(f, s);
+    if (len > 0) {
+      const speed = (keys.has("ShiftLeft") || keys.has("ShiftRight") ? 2.6 : 1.4) * Math.min(1, len) / Math.max(len, 1);
+      const cy = Math.cos(player.yaw), sy = Math.sin(player.yaw);
+      // forward = (cos yaw, sin yaw); right = (sin yaw, -cos yaw) in plan coordinates (Y north)
+      const dx = (f * cy + s * sy) * speed * dt, dy = (f * sy - s * cy) * speed * dt;
+      if (!blocked(player.x + dx, player.y)) player.x += dx;
+      if (!blocked(player.x, player.y + dy)) player.y += dy;
+      bob += dt * speed * 6;
+    }
+    const eye = player.eye + Math.sin(bob) * 0.012;
+    camera.position.set(player.x, eye, -player.y);
+    const cp = Math.cos(player.pitch);
+    camera.lookAt(player.x + Math.cos(player.yaw) * cp, eye + Math.sin(player.pitch), -(player.y + Math.sin(player.yaw) * cp));
+    const room = roomAt(player.x, player.y) || lastRoom || "Entrance";
+    if (room !== lastRoom) { roomEl.textContent = room; sizeEl.textContent = SIZES[room] || ""; lastRoom = room; }
+    // minimap: render covers plan px 30..1430 x 60..870
+    const px = player.x * S + 45, py = -player.y * S + 160;
+    const W = mapEl.clientWidth, H = mapEl.clientHeight;
+    const mx = (px - 30) / 1400 * W, my = (py - 60) / 810 * H;
+    dot.style.left = mx + "px"; dot.style.top = my + "px";
+    cone.style.left = mx + "px"; cone.style.top = my + "px";
+    cone.style.transform = `rotate(${90 - player.yaw * 180 / Math.PI}deg)`;
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+
+</body>
+</html>
