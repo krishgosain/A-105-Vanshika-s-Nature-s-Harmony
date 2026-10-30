@@ -311,16 +311,7 @@ asset("Coffee_candle", "GlassHurricaneCandleHolder.glb", X(770) + 0.12, Y(330) +
 for i, (mt, rr) in enumerate([("book_b", 0), ("book_a", 8)]):
     boxc(f"Coffee_book{i}", X(770) - 0.18, Y(330) - 0.12, 0.395 + i * 0.04, 0.3, 0.24, 0.035, mt, "Decor", rot=rr)
 sphere("Coffee_bowl", X(770) - 0.18, Y(330) - 0.12, 0.49, 0.09, "ceramic_black", sz=0.45)
-# arc floor lamp at the south end of the sofa
-ax, ay = X(895), Y(445)
-cyl("ArcLamp_base", ax, ay, 0, 0.17, 0.04, "marble_nero", "Furniture", 40)
-cyl("ArcLamp_stem", ax, ay, 0.04, 0.012, 1.6, "brass", "Furniture", 12)
-arc_pts = [(ax - 0.45 + 0.45 * math.cos(math.radians(t)), ay, 1.64 + 0.55 * math.sin(math.radians(t))) for t in range(0, 181, 6)]
-tube("ArcLamp_arc", arc_pts, 0.012, "brass")
-cyl("ArcLamp_drop", ax - 0.9, ay, 1.52, 0.006, 0.12, "brass", "Furniture", 8)
-sphere("ArcLamp_shade", ax - 0.9, ay, 1.52, 0.2, "brass", sz=0.55)
-sphere("ArcLamp_bulb", ax - 0.9, ay, 1.46, 0.07, "opal")
-COLLIDERS.append([ax - 0.18, ay - 0.18, ax + 0.18, ay + 0.18])
+ax, ay = X(895), Y(445)  # (arc floor lamp removed)
 asset("Plant_living", "DiffuseTransmissionPlant.glb", X(668), Y(200), 0, rot=30, scale=1.9, recolor={"base": ((0.22, 0.21, 0.20), 0.8)}, collide=True)
 # ring chandelier over the seating
 for i, (R, z) in enumerate([(0.55, 2.42), (0.42, 2.30), (0.30, 2.18)]):
@@ -407,7 +398,6 @@ panel_art("Art_foyer", X(1000), Y(462) - 0.002, 1.55, 0.7, 0.98, "art_foyer", "S
 box("Vest_sign", X(1190), Y(462) - 0.05, 1.25, X(1235), Y(462) - 0.012, 1.85, "walnut_dark", "Decor")
 box("Vest_glow", X(1188), Y(462) - 0.012, 1.23, X(1237), Y(462) - 0.008, 1.87, "led_soft", "Decor")
 box("Vest_brass", X(1195), Y(462) - 0.052, 1.32, X(1230), Y(462) - 0.05, 1.36, "brass", "Decor")
-asset("Plant_vest", "DiffuseTransmissionPlant.glb", X(1175), Y(560), 0, scale=1.4, recolor={"base": ((0.75, 0.71, 0.65), 0.7)}, collide=True)
 for (px, py) in [(1000, 515), (1090, 515), (1250, 522), (1350, 522)]:
     spot(px, py, H - 0.04)
 
@@ -666,7 +656,7 @@ for i, (x, y, z, w) in enumerate(SPOTS):
 def pl(name, x, y, z, w, col=(1.0, 0.82, 0.62), r=0.05):
     ld = bpy.data.lights.new(name, "POINT"); ld.energy = w; ld.color = col; ld.shadow_soft_size = r
     o = bpy.data.objects.new(name, ld); o.location = (x, y, z); coll("Lights").objects.link(o)
-pl("ChandD", tx, ty, 1.9, 60); pl("RingL", X(776), Y(325), 2.2, 50); pl("ArcL", ax - 0.9, ay, 1.38, 25)
+pl("ChandD", tx, ty, 1.9, 60); pl("RingL", X(776), Y(325), 2.2, 50)
 for n_ in ["BR2_ns1", "BR2_ns2", "BR3_ns1", "BR3_ns2", "MB_ns1", "MB_ns2"]:
     g = bpy.data.objects.get(n_ + "_globe")
     if g: pl(n_ + "_L", g.location.x, g.location.y, g.location.z - 0.05, 18)

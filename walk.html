@@ -87,13 +87,24 @@ const canvas = document.getElementById("view");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, logarithmicDepthBuffer: true, powerPreference: "high-performance" });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+// Same look as the Cycles renders: AgX tone mapping at +0.3 EV; all diffuse light comes from the Cycles bake
+renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = Math.pow(2, 0.3);
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0xd9e3e8);
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 const camera = new THREE.PerspectiveCamera(70, 1, 0.08, 300);
-scene.add(new THREE.HemisphereLight(0xfff1e0, 0x8c8072, 0.9));
-const sun = new THREE.DirectionalLight(0xffe8cc, 1.4); sun.position.set(-8, 16, 14); scene.add(sun);
+const V = "?v=4";
+const texLoader = new THREE.TextureLoader();
+// reflections: the rendered 360 of the living room, so polished surfaces mirror the real interior
+const envReady = new Promise(res => texLoader.load("pano/living_s.jpg" + V, t => {
+  t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace;
+  scene.environment = pmrem.fromEquirectangular(t).texture; t.dispose(); res();
+}, undefined, () => { scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; res(); }));
+const loadLightmap = url => new Promise((res, rej) => texLoader.load(url + V, t => {
+  t.flipY = false; t.channel = 1; t.colorSpace = THREE.SRGBColorSpace;
+  t.generateMipmaps = false; t.minFilter = THREE.LinearFilter;   // mip levels would blend neighbouring atlas charts
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy(); res(t);
+}, undefined, rej));
+const lightmapsReady = Promise.all([loadLightmap("model/lightmap.jpg"), loadLightmap("model/lightmapV.jpg")]);
 
 let colliders = [], rooms = {}, ready = false;
 const player = { x: 0, y: 0, yaw: Math.PI, pitch: 0, eye: 1.6, r: 0.22 };
@@ -104,30 +115,44 @@ const go = document.getElementById("go");
 const draco = new DRACOLoader(); draco.setDecoderPath("lib/draco/");
 const gl = new GLTFLoader(); gl.setDRACOLoader(draco);
 Promise.all([
-  fetch("model/layout.json?v=3").then(r => r.json()),
-  new Promise((res, rej) => gl.load("model/a105.glb?v=3", res, ev => { if (ev.total) go.textContent = `Loading the home… ${Math.round(100 * ev.loaded / ev.total)}%`; }, rej))
-]).then(([lay, gltf]) => {
+  fetch("model/layout.json" + V).then(r => r.json()),
+  fetch("model/bake.json" + V).then(r => r.json()),
+  lightmapsReady, envReady,
+  new Promise((res, rej) => gl.load("model/a105.glb" + V, res, ev => { if (ev.total) go.textContent = `Loading the home… ${Math.round(100 * ev.loaded / ev.total)}%`; }, rej))
+]).then(([lay, bake, [lightmapA, lightmapV], _env, gltf]) => {
   colliders = lay.colliders; rooms = lay.rooms;
+  // stored value x range = Cycles diffuse light; x pi turns it into irradiance
+  const scale = bake.lmax * Math.PI;
+  // the stock chunk minus the environment's diffuse term: diffuse light comes only from the bake
+  const bakedLightsChunk = THREE.ShaderChunk.lights_fragment_maps.replace("iblIrradiance += getIBLIrradiance( geometryNormal );", "");
+  if (!/getIBLIrradiance/.test(THREE.ShaderChunk.lights_fragment_maps)) console.warn("three.js chunk changed");
+  const bakedKind = o => { for (let p = o; p; p = p.parent) { const m = /^Baked([AV])/.exec(p.name); if (m) return m[1]; } return null; };
   gltf.scene.traverse(o => {
     if (!o.isMesh || !o.material) return;
-    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    const kind = bakedKind(o);
+    const mats = (Array.isArray(o.material) ? o.material : [o.material]).map(m => kind ? m.clone() : m);
     for (const m of mats) {
-      const n = m.name || "";
-      m.envMapIntensity = /marble|mirror|brass|chrome|glass|lacquer|screen|black_metal|porcelain/.test(n) ? 1.0 : 0.45;
-      if (/glass|sheer/.test(n)) { m.depthWrite = false; m.side = THREE.DoubleSide; }
-      if (/^led|opal/.test(n)) { m.emissiveIntensity = Math.min(m.emissiveIntensity || 1, 3); m.toneMapped = false; }
-      if (/backdrop/.test(n)) { m.emissiveIntensity = 1.0; m.toneMapped = false; }
+      if (/glass|sheer/i.test(m.name || "")) { m.depthWrite = false; m.side = THREE.DoubleSide; }
+      // sheers glow with the daylight behind them in Cycles; approximate that transmitted light
+      if (/^sheer/i.test(m.name || "")) { m.emissive = new THREE.Color(0xf3eadc); m.emissiveIntensity = 0.7; m.opacity = 0.62; }
+      m.aoMap = null;   // Cycles ignores the models' glTF occlusion maps, so the walk does too
+      if (!kind || !o.geometry.getAttribute("uv1")) continue;
+      m.lightMap = kind === "A" ? lightmapA : lightmapV; m.lightMapIntensity = scale;
+      // keep reflections from the environment, take all diffuse light from the bake
+      m.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace("#include <lights_fragment_maps>", bakedLightsChunk); };
+      m.customProgramCacheKey = () => "baked";
     }
+    o.material = Array.isArray(o.material) ? mats : mats[0];
   });
   scene.add(gltf.scene);
-  // warm downlights: real lights in the main rooms, the rest are emissive
-  const S2 = lay.spots || [];
-  S2.forEach((p, i) => { if (i % 6 === 0) { const L = new THREE.PointLight(0xffd6a6, 4.5, 6.5, 2); L.position.set(p[0], lay.ceiling - 0.35, -p[1]); scene.add(L); } });
-  teleport(JUMPS[0]); buildJumps(); ready = true;
+  teleport(JUMPS[0]); fromHash(); buildJumps(); ready = true;
   go.disabled = false; go.textContent = "Enter the home";
 }).catch(err => { go.textContent = "The home didn't load. Reload the page to try again."; console.error(err); });
 
 function teleport([n, px, py, yd]) { player.x = px2x(px); player.y = py2y(py); player.yaw = yd * Math.PI / 180; player.pitch = 0; }
+// deep link: walk.html#at=<plan x>,<plan y>,<heading in degrees>
+function fromHash() { const m = location.hash.match(/at=([\d.-]+),([\d.-]+),([\d.-]+)/); if (m) teleport(["", +m[1], +m[2], +m[3]]); }
+addEventListener("hashchange", () => { if (ready) fromHash(); });
 function buildJumps() {
   const box = document.getElementById("jump");
   for (const j of JUMPS) { const b = document.createElement("button"); b.className = "btn"; b.type = "button"; b.textContent = j[0];
