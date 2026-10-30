@@ -132,7 +132,7 @@ def bake(ob, mats, res, padding, fname, samples, max_cost=2.0):
     print("BAKED", ob.name, flush=True)
 
 # furniture lighting is soft, so it gets a smaller atlas and many more samples per texel
-bake(A, matsA, ATLAS, 4, "lightmap_raw.exr", SAMPLES)
+bake(A, matsA, ATLAS, 4, "lightmap_raw.exr", SAMPLES * 2)
 bake(V, matsV, ATLAS // 2, 2, "lightmapV_raw.exr", SAMPLES * 2, max_cost=4.0)
 json.dump({"atlas": ATLAS}, open(os.path.join(ROOT, "bake_meta.json"), "w"))
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT, "A105_baked.blend"))

@@ -28,19 +28,20 @@ VIEWS = {
     "v_master": ((330, 560), 1.5, (55, 400), 1.05),
     "v_balcony": ((560, 120), 1.5, (900, 90), 1.0),
     "v_foyer": ((1300, 522), 1.6, (900, 522), 1.35),
+    "v_entry": ((1540, 522), 1.05, (1140, 516), 0.45),
 }
 cam_d = bpy.data.cameras.new("Cam"); cam = bpy.data.objects.new("Cam", cam_d); sc.collection.objects.link(cam); sc.camera = cam
 sc.render.resolution_x, sc.render.resolution_y = W, Hh
 sc.cycles.samples = samples
 if which == "top":
     for o in sc.objects:
-        if any(c.name in ("Ceiling",) for c in o.users_collection) or o.name.startswith(("Balcony_Soffit", "Ring", "Chand", "Backdrop", "ArcLamp", "Sheer", "Drape", "BR2_sheer", "BR3_sheer", "MB_sheer", "BR2_d", "BR3_d", "MB_drape", "Plant_living")) or "_wire" in o.name or "_globe" in o.name:
+        if any(c.name in ("Ceiling",) for c in o.users_collection) or o.name.startswith(("Balcony_Soffit", "Ring", "Chand", "Backdrop", "Sheer", "Drape", "BR2_sheer", "BR3_sheer", "MB_sheer", "BR2_d", "BR3_d", "MB_drape", "Plant_living")) or "_wire" in o.name or "_globe" in o.name:
             o.hide_render = True
         if o.type == 'LIGHT' and not o.name.startswith("Sun"): o.hide_render = True
     sun = sc.objects["Sun"]; sun.rotation_euler = (math.radians(14), math.radians(6), math.radians(160)); sun.data.energy = 2.2
-    cam_d.type = 'ORTHO'; cam_d.ortho_scale = 1400 / S
-    cam.location = ((X(30) + X(1430)) / 2, (Y(60) + Y(870)) / 2, 20); cam.rotation_euler = (0, 0, 0)
-    sc.render.resolution_y = int(W * 810 / 1400)
+    cam_d.type = 'ORTHO'; cam_d.ortho_scale = 1540 / S
+    cam.location = ((X(30) + X(1570)) / 2, (Y(60) + Y(870)) / 2, 20); cam.rotation_euler = (0, 0, 0)
+    sc.render.resolution_y = int(W * 810 / 1540)
     sc.view_settings.exposure = -0.2
     sc.render.filepath = os.path.join(outdir, "plan.jpg"); sc.render.image_settings.file_format = 'JPEG'; sc.render.image_settings.quality = 90
 elif which in NODES:
@@ -56,7 +57,7 @@ elif which in NODES:
     sc.render.image_settings.file_format = 'JPEG'; sc.render.image_settings.quality = 90
 else:
     (ex, ey), ez, (tx, ty), tz = VIEWS[which]
-    cam_d.lens = 18 if which.startswith("hero") else 16; cam_d.sensor_width = 36
+    cam_d.lens = 18 if which.startswith("hero") else (24 if which == "v_entry" else 16); cam_d.sensor_width = 36
     cam.location = (X(ex), Y(ey), ez)
     d = Vector((X(tx), Y(ty), tz)) - cam.location
     cam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()

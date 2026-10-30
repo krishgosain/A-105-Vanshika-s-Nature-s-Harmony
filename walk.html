@@ -28,7 +28,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--sans); ov
 .btn { border: 1px solid var(--line); background: var(--glass); color: var(--ink); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border-radius: 999px; padding: 9px 14px; font: 600 .78rem var(--sans); cursor: pointer; text-decoration: none; }
 .btn:hover, .btn:focus-visible { border-color: var(--gold); outline: none; }
-#map { right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(300px, 38vw); aspect-ratio: 1400 / 810;
+#map { right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(300px, 38vw); aspect-ratio: 1540 / 810;
   border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--glass); }
 #map img { width: 100%; height: 100%; display: block; opacity: .9; object-fit: cover; }
 #dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px rgba(201,164,106,.35); }
@@ -52,7 +52,7 @@ h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(2.
 <canvas id="view" aria-label="First-person view of Residence A-105"></canvas>
 <div id="room" class="hud" aria-live="polite"><div class="k">Residence A-105</div><div class="name">Entrance</div><div class="size">Outside the front door</div></div>
 <div id="tools" class="hud"><a class="btn" href="index.html">360° tour</a></div>
-<div id="map" class="hud"><img src="img/plan.jpg" alt="Plan of A-105 showing your position"><div id="cone"></div><div id="dot"></div></div>
+<div id="map" class="hud"><img src="img/plan.jpg?v=4" alt="Plan of A-105 showing your position"><div id="cone"></div><div id="dot"></div></div>
 <div id="jump" class="hud" aria-label="Jump to a room"></div>
 <div id="help" class="hud">WASD or arrows to move · drag or click to look · Shift to walk faster</div>
 <div id="stick"><div id="knob"></div></div>
@@ -79,7 +79,7 @@ const SIZES = { "Living": "11.98 x 13.45 ft", "Family & Dining": "20.87 x 11.48 
   "Utility": "8.83 x 3.94 ft", "Bedroom 2": "10.99 x 12.12 ft", "Bedroom 3": "11.32 x 13.12 ft", "Master Bedroom": "13.45 x 11.48 ft",
   "Master Bath": "7.87 x 4.92 ft", "Bath 2": "4.92 x 8.86 ft", "Bath 3": "4.92 x 7.87 ft", "Balcony": "Runs the full façade",
   "Master Balcony": "5.05 x 5.12 ft", "Entrance": "Outside the front door" };
-const JUMPS = [["Entrance", 1250, 522, 180], ["Living", 745, 445, 120], ["Dining", 760, 560, 230], ["Kitchen", 960, 655, 0],
+const JUMPS = [["Entrance", 1530, 522, 180, -7], ["Living", 745, 445, 120], ["Dining", 760, 560, 230], ["Kitchen", 960, 655, 0],
   ["Bedroom 2", 1100, 360, 20], ["Bedroom 3", 610, 400, 160], ["Master", 330, 520, 165], ["Balcony", 690, 110, 0]];
 const S = 74, px2x = px => (px - 45) / S, py2y = py => -(py - 160) / S;
 
@@ -92,7 +92,7 @@ renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = Math
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0xd9e3e8);
 const pmrem = new THREE.PMREMGenerator(renderer);
 const camera = new THREE.PerspectiveCamera(70, 1, 0.08, 300);
-const V = "?v=4";
+const V = "?v=5";
 const texLoader = new THREE.TextureLoader();
 // reflections: the rendered 360 of the living room, so polished surfaces mirror the real interior
 const envReady = new Promise(res => texLoader.load("pano/living_s.jpg" + V, t => {
@@ -106,8 +106,8 @@ const loadLightmap = url => new Promise((res, rej) => texLoader.load(url + V, t 
 }, undefined, rej));
 const lightmapsReady = Promise.all([loadLightmap("model/lightmap.jpg"), loadLightmap("model/lightmapV.jpg")]);
 
-let colliders = [], rooms = {}, ready = false;
-const player = { x: 0, y: 0, yaw: Math.PI, pitch: 0, eye: 1.6, r: 0.22 };
+let colliders = [], rooms = {}, levels = [], ready = false;
+const player = { x: 0, y: 0, z: 0, yaw: Math.PI, pitch: 0, eye: 1.6, r: 0.22 };
 function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener("resize", resize); resize();
 
@@ -120,7 +120,7 @@ Promise.all([
   lightmapsReady, envReady,
   new Promise((res, rej) => gl.load("model/a105.glb" + V, res, ev => { if (ev.total) go.textContent = `Loading the home… ${Math.round(100 * ev.loaded / ev.total)}%`; }, rej))
 ]).then(([lay, bake, [lightmapA, lightmapV], _env, gltf]) => {
-  colliders = lay.colliders; rooms = lay.rooms;
+  colliders = lay.colliders; rooms = lay.rooms; levels = lay.levels || [];
   // stored value x range = Cycles diffuse light; x pi turns it into irradiance
   const scale = bake.lmax * Math.PI;
   // the stock chunk minus the environment's diffuse term: diffuse light comes only from the bake
@@ -135,6 +135,8 @@ Promise.all([
       if (/glass|sheer/i.test(m.name || "")) { m.depthWrite = false; m.side = THREE.DoubleSide; }
       // sheers glow with the daylight behind them in Cycles; approximate that transmitted light
       if (/^sheer/i.test(m.name || "")) { m.emissive = new THREE.Color(0xf3eadc); m.emissiveIntensity = 0.7; m.opacity = 0.62; }
+      // polished granite reflects the white passage walls in Cycles; damp the living-room reflections there
+      if (/^granite/i.test(m.name || "")) m.envMapIntensity = 0.22;
       m.aoMap = null;   // Cycles ignores the models' glTF occlusion maps, so the walk does too
       if (!kind || !o.geometry.getAttribute("uv1")) continue;
       m.lightMap = kind === "A" ? lightmapA : lightmapV; m.lightMapIntensity = scale;
@@ -149,7 +151,9 @@ Promise.all([
   go.disabled = false; go.textContent = "Enter the home";
 }).catch(err => { go.textContent = "The home didn't load. Reload the page to try again."; console.error(err); });
 
-function teleport([n, px, py, yd]) { player.x = px2x(px); player.y = py2y(py); player.yaw = yd * Math.PI / 180; player.pitch = 0; }
+function teleport([n, px, py, yd, pd = 0]) { player.x = px2x(px); player.y = py2y(py); player.yaw = yd * Math.PI / 180; player.pitch = pd * Math.PI / 180; player.z = floorAt(player.x, player.y); }
+// floor height: the entrance landing and its three steps; everywhere else is level
+function floorAt(x, y) { for (const [x0, y0, x1, y1, z] of levels) if (x >= Math.min(x0, x1) && x <= Math.max(x0, x1) && y >= Math.min(y0, y1) && y <= Math.max(y0, y1)) return z; return 0; }
 // deep link: walk.html#at=<plan x>,<plan y>,<heading in degrees>
 function fromHash() { const m = location.hash.match(/at=([\d.-]+),([\d.-]+),([\d.-]+)/); if (m) teleport(["", +m[1], +m[2], +m[3]]); }
 addEventListener("hashchange", () => { if (ready) fromHash(); });
@@ -209,14 +213,15 @@ function tick(now) {
       if (!blocked(player.x + dx, player.y)) player.x += dx; if (!blocked(player.x, player.y + dy)) player.y += dy;
       bob += dt * sp * 6;
     }
-    const eye = player.eye + Math.sin(bob) * 0.01;
+    player.z += (floorAt(player.x, player.y) - player.z) * Math.min(1, dt * 9);   // ease up and down the steps
+    const eye = player.z + player.eye + Math.sin(bob) * 0.01;
     camera.position.set(player.x, eye, -player.y);
     const cp = Math.cos(player.pitch);
     camera.lookAt(player.x + Math.cos(player.yaw) * cp, eye + Math.sin(player.pitch), -(player.y + Math.sin(player.yaw) * cp));
     const room = roomAt(player.x, player.y) || lastRoom || "Entrance";
     if (room !== lastRoom) { roomEl.textContent = room; sizeEl.textContent = SIZES[room] || ""; lastRoom = room; }
     const px = player.x * S + 45, py = -player.y * S + 160, W = mapEl.clientWidth, Hh = mapEl.clientHeight;
-    const mx = (px - 30) / 1400 * W, my = (py - 60) / 810 * Hh;
+    const mx = (px - 30) / 1540 * W, my = (py - 60) / 810 * Hh;
     dot.style.left = cone.style.left = mx + "px"; dot.style.top = cone.style.top = my + "px";
     cone.style.transform = `rotate(${90 - player.yaw * 180 / Math.PI}deg)`;
   }

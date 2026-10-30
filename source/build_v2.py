@@ -17,6 +17,7 @@ mat("marble_counter", tex="marble_counter.jpg", tile=1.4, rough=0.06, coat=0.4)
 mat("marble_slab", tex="marble_counter.jpg", tile=2.4, rough=0.05, coat=0.5)
 mat("marble_nero", tex="marble_nero.jpg", tile=1.4, rough=0.06, coat=0.4)
 mat("travertine", tex="travertine.jpg", tile=0.8, rough=0.45)
+mat("granite_black", tex="granite_black.jpg", tile=1.0, rough=0.07, coat=0.5)   # entrance steps, as in the sample flat
 mat("herringbone", tex="herringbone.jpg", normal="herringbone_n.png", nstr=0.5, tile=1.2, rough=0.32, coat=0.15)
 mat("walnut", tex="walnut.jpg", normal="walnut_n.png", nstr=0.15, tile=1.0, rough=0.38)
 mat("walnut_dark", (0.75, 0.75, 0.75), tex="walnut.jpg", tile=0.8, rough=0.35)
@@ -67,7 +68,7 @@ mat("book_a", (0.75, 0.70, 0.62), rough=0.7); mat("book_b", (0.12, 0.16, 0.18), 
 mat("ceramic_black", (0.03, 0.03, 0.03), rough=0.25, coat=0.4)
 mat("ceramic_white", (0.9, 0.88, 0.84), rough=0.3, coat=0.3)
 mat("backdrop", (1, 1, 1), tex="backdrop_garden.jpg", tile=1.0, rough=1.0, emit=(1, 1, 1), emit_strength=0.0)
-for a in ["art_living.jpg", "art_dining.jpg", "art_br3.jpg", "art_foyer.jpg", "art_orange_l.png", "art_orange_r.png", "art_coral.png", "art_sticks.png"]:
+for a in ["art_leaves.jpg", "art_living.jpg", "art_dining.jpg", "art_br3.jpg", "art_foyer.jpg", "art_orange_l.png", "art_orange_r.png", "art_coral.png", "art_sticks.png"]:
     mat(a.split(".")[0], tex=a, tile=1.0, rough=0.75)
 mat("chevron", (0.8, 0.8, 0.8), tex="chevron.jpg", tile=1.0, rough=0.9, sheen=0.5)
 # backdrop: emission driven by its own texture
@@ -193,7 +194,7 @@ wall("T2North", 935, 160, 1047, 172, [W(960, 1010, 1.7, 2.3)])
 wall("BR2West", 1047, 160, 1057, 452, [D(318, 376, hinge="a", swing=-1), D(390, 450, hinge="b", swing=1)])
 wall("BR2North", 1057, 160, 1325, 172, [SL(1117, 1253)])
 wall("BR2East", 1313, 172, 1325, 452)
-wall("BR2South", 1047, 452, 1420, 462)
+wall("BR2South", 1047, 452, 1560, 462)
 wall("MainDoorLine", 1137, 462, 1150, 562, [D(475, 557, hinge="a", swing=-1, leaf="walnut_dark", trim="brass_brushed")])
 wall("KitchenEast", 1137, 562, 1150, 850)
 wall("KitchenNorth", 935, 562, 1137, 568)
@@ -202,8 +203,8 @@ wall("KitchenSouth", 847, 745, 1137, 752, [D(1002, 1060, hinge="b", swing=1)])
 wall("DiningSouth", 313, 745, 847, 752, [W(712, 845, 0.6, 2.4)])
 wall("UtilityWest", 922, 752, 935, 850)
 box("UtilityParapet", X(935), Y(850), 0, X(1137), Y(842), 1.0, "plaster", "Walls", True)
-wall("VestibuleSouth", 1150, 583, 1420, 597)
-wall("VestibuleEnd", 1410, 462, 1420, 583)
+wall("VestibuleSouth", 1150, 583, 1560, 597)
+wall("VestibuleEnd", 1550, 462, 1560, 583)
 for nm, r in {"ShaftW": (248, 95, 262, 160), "ShaftE": (365, 95, 378, 160), "Shaft2W": (922, 95, 935, 160), "Shaft2E": (1047, 95, 1057, 160)}.items():
     box(nm, X(r[0]), Y(r[3]), 0, X(r[2]), Y(r[1]), H, "plaster_ext", "Walls", True)
 box("ShaftN1", X(248), Y(98), 0, X(378), Y(95), H, "plaster_ext", "Walls", True)
@@ -220,11 +221,12 @@ box("Floor_Master2", X(55), Y(597), 0, X(313), Y(557), 0.006, "herringbone", "Fl
 for nm, r in {"T1": (192, 172, 365, 288), "T2": (935, 172, 1047, 378), "T3": (325, 564, 437, 745)}.items():
     box("Floor_" + nm, X(r[0]), Y(r[3]), 0, X(r[2]), Y(r[1]), 0.006, "stone_grey", "Floors")
 floor("Floor_Utility", 935, 752, 1137, 842, "stone_grey", -0.02)
-floor("Floor_Vestibule", 1150, 462, 1410, 583, "marble_nero", 0.0)
 # one continuous balcony along the whole north facade (master -> living -> bedroom 2)
 floor("Balcony_Deck", 55, 40, 1313, 160, "teak_deck", -0.03)
 floor("Balcony_Master", 55, 160, 180, 288, "teak_deck", -0.03)
-floor("Slab_Below", 30, 20, 1430, 870, "plaster_ext", -0.1, "Exterior")
+floor("Slab_Below", 30, 20, 1150, 870, "plaster_ext", -0.1, "Exterior")      # stops short of the sunken entrance passage
+floor("Slab_BelowN", 1150, 20, 1570, 462, "plaster_ext", -0.1, "Exterior")
+floor("Slab_BelowS", 1150, 597, 1570, 870, "plaster_ext", -0.1, "Exterior")
 box("Balcony_Soffit", X(55), Y(160), H + 0.15, X(1313), Y(40), H + 0.35, "plaster_ext", "Exterior")
 box("Balcony_SoffitM", X(55), Y(288), H + 0.15, X(180), Y(160), H + 0.35, "plaster_ext", "Exterior")
 for nm, (a, b) in {"RailN": ((55, 37), (1313, 41))}.items():
@@ -238,7 +240,7 @@ for i in range(0, 14):
     box(f"RailPost{i}", X(xx) - 0.02, Y(41) - 0.0, -0.03, X(xx) + 0.02, Y(37), 1.05, "black_metal", "Exterior")
 
 box("Ceiling", X(45), Y(752), H, X(1150), Y(160), H + 0.12, "ceiling", "Ceiling")
-box("Ceiling_Vest", X(1150), Y(597), H, X(1420), Y(452), H + 0.12, "ceiling", "Ceiling")
+box("Ceiling_Vest", X(1150), Y(597), H, X(1560), Y(452), H + 0.12, "ceiling", "Ceiling")
 box("Ceiling_BR2", X(1150), Y(462), H, X(1325), Y(160), H + 0.12, "ceiling", "Ceiling")
 
 # cove-lit false ceilings: perimeter band dropped 20 cm, LED hidden in the step, glowing onto the recessed field
@@ -398,8 +400,44 @@ panel_art("Art_foyer", X(1000), Y(462) - 0.002, 1.55, 0.7, 0.98, "art_foyer", "S
 box("Vest_sign", X(1190), Y(462) - 0.05, 1.25, X(1235), Y(462) - 0.012, 1.85, "walnut_dark", "Decor")
 box("Vest_glow", X(1188), Y(462) - 0.012, 1.23, X(1237), Y(462) - 0.008, 1.87, "led_soft", "Decor")
 box("Vest_brass", X(1195), Y(462) - 0.052, 1.32, X(1230), Y(462) - 0.05, 1.36, "brass", "Decor")
-for (px, py) in [(1000, 515), (1090, 515), (1250, 522), (1350, 522)]:
+
+# ---- entrance passage, as in the sample flat: three black-granite steps up to a landing in front of the door
+RISE, TREAD = 0.16, 0.30
+XD = X(1150)                      # outer face of the door wall
+XL = XD + 2.0                     # top-step nose: 2.0 m of landing from the steps to the door
+XE = X(1550)                      # end of the approach
+YS, YN = Y(583), Y(462)           # passage side walls (south / north faces)
+LEVELS = [(XD, XL, 0.0), (XL, XL + TREAD, -RISE), (XL + TREAD, XL + 2 * TREAD, -2 * RISE), (XL + 2 * TREAD, XE, -3 * RISE)]
+for i, (a, b, z) in enumerate(LEVELS):
+    box(f"Entry_step{i}", a, YS, -0.62, b, YN, z, "granite_black", "Floors")
+for i, (a, b, z) in enumerate(LEVELS[:-1]):        # slim bullnose lip on each step edge
+    box(f"Entry_nose{i}", b - 0.01, YS, z - 0.035, b + 0.018, YN, z, "granite_black", "Floors", bevel=0.008)
+# side and end walls carried down to the lower floor
+for nm, (y0, y1) in {"S": (Y(597), YS), "N": (YN, Y(452))}.items():
+    box(f"Entry_wallfoot{nm}", XL, y0, -0.62, X(1560), y1, 0.0, "plaster", "Walls")
+box("Entry_wallfootE", XE, Y(597), -0.62, X(1560), Y(452), 0.0, "plaster", "Walls")
+# black granite skirting that steps down with the stairs (replaces the flat skirting on the passage walls)
+for o in [o for o in bpy.data.objects if (o.name.startswith("BR2South_w") and o.name.endswith("_sk-1"))
+          or (o.name.startswith("VestibuleSouth_w") and o.name.endswith("_sk1"))
+          or (o.name.startswith("VestibuleEnd_w") and o.name.endswith("_sk-1"))]:
+    bpy.data.objects.remove(o, do_unlink=True)
+SK, SKT = 0.10, 0.012
+box("BR2South_skHall", X(1047), YN, 0, XD, YN - SKT, SK, "lacquer_black", "Walls")     # hall side keeps its skirting
+box("Entry_skN0", XD, YN, 0, XL, YN - SKT, SK, "granite_black", "Walls")
+box("Entry_skS0", XD, YS, 0, XL, YS + SKT, SK, "granite_black", "Walls")
+for i, (a, b, z) in enumerate(LEVELS[1:], 1):
+    top_prev = LEVELS[i - 1][2]
+    box(f"Entry_skN{i}", a, YN, z, b, YN - SKT, z + SK, "granite_black", "Walls")
+    box(f"Entry_skS{i}", a, YS, z, b, YS + SKT, z + SK, "granite_black", "Walls")
+    box(f"Entry_skNr{i}", a, YN, z + SK - 0.001, a + SK * 0.6, YN - SKT, top_prev + SK, "granite_black", "Walls")
+    box(f"Entry_skSr{i}", a, YS, z + SK - 0.001, a + SK * 0.6, YS + SKT, top_prev + SK, "granite_black", "Walls")
+box("Entry_skE", XE, YS, -3 * RISE, XE - SKT, YN, -3 * RISE + SK, "granite_black", "Walls")
+# the leaf painting from the sample flat, on the left-hand wall as you walk up to the door
+panel_art("Art_entry", XL - 0.55, YS + 0.002, 1.62, 0.9, 1.2, "art_leaves", "N", frame="black_metal", depth=0.03)
+for (px, py) in [(1000, 515), (1090, 515)]:
     spot(px, py, H - 0.04)
+for (px, py) in [(1235, 522), (1330, 522), (1430, 522), (1520, 522)]:     # entrance passage: brighter wash on white walls
+    spot(px, py, H - 0.04, w=34)
 
 # ============================================================== KITCHEN
 kx0, kx1, ky_n, ky_s = X(935), X(1137), Y(568), Y(745)
@@ -657,6 +695,7 @@ def pl(name, x, y, z, w, col=(1.0, 0.82, 0.62), r=0.05):
     ld = bpy.data.lights.new(name, "POINT"); ld.energy = w; ld.color = col; ld.shadow_soft_size = r
     o = bpy.data.objects.new(name, ld); o.location = (x, y, z); coll("Lights").objects.link(o)
 pl("ChandD", tx, ty, 1.9, 60); pl("RingL", X(776), Y(325), 2.2, 50)
+pl("EntrySconce", X(1212), Y(462) - 0.12, 1.55, 22)      # warm glow of the name plate by the front door
 for n_ in ["BR2_ns1", "BR2_ns2", "BR3_ns1", "BR3_ns2", "MB_ns1", "MB_ns2"]:
     g = bpy.data.objects.get(n_ + "_globe")
     if g: pl(n_ + "_L", g.location.x, g.location.y, g.location.z - 0.05, 18)
@@ -709,9 +748,11 @@ meta = {"scale_px_per_m": S, "ceiling": H,
             "Utility": [X(935), Y(842), X(1137), Y(752)], "Bedroom 2": [X(1057), Y(452), X(1313), Y(172)],
             "Bedroom 3": [X(378), Y(462), X(635), Y(172)], "Master Bedroom": [X(55), Y(597), X(365), Y(297)],
             "Master Bath": [X(192), Y(288), X(365), Y(172)], "Bath 2": [X(935), Y(378), X(1047), Y(172)],
-            "Bath 3": [X(325), Y(745), X(437), Y(564)], "Entrance": [X(1150), Y(583), X(1410), Y(462)],
+            "Bath 3": [X(325), Y(745), X(437), Y(564)], "Entrance": [X(1150), Y(583), X(1550), Y(462)],
             "Balcony": [X(55), Y(160), X(1313), Y(40)], "Master Balcony": [X(55), Y(288), X(180), Y(160)]},
-        "spots": [[round(s[0], 3), round(s[1], 3)] for s in SPOTS]}
+        "spots": [[round(s[0], 3), round(s[1], 3)] for s in SPOTS],
+        # floor heights of the entrance landing and steps (metres): x0, y0, x1, y1, z
+        "levels": [[round(a, 3), round(YS, 3), round(b, 3), round(YN, 3), z] for (a, b, z) in LEVELS]}
 with open(os.path.join(ROOT, "layout.json"), "w") as f:
     json.dump(meta, f)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ROOT, "A105_lux.blend"))

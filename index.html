@@ -83,7 +83,7 @@ h1 em { font-style: italic; color: var(--gold); }
 .chip[aria-current="true"] { background: var(--ink); color: #15110c; border-color: transparent; }
 #plan { right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(80px + env(safe-area-inset-bottom, 0px)); width: min(300px, 28vw);
   border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: rgba(16,13,10,.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-#plan .wrap { position: relative; aspect-ratio: 1400 / 810; }
+#plan .wrap { position: relative; aspect-ratio: 1540 / 810; }
 #plan img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .9; }
 #plan .pin { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid var(--ink); background: rgba(14,12,10,.7); cursor: pointer; padding: 0; }
 #plan .pin[aria-current="true"] { background: var(--gold); border-color: var(--gold); }
@@ -141,7 +141,7 @@ h1 em { font-style: italic; color: var(--gold); }
 </div>
 <nav id="rooms" class="hud" hidden aria-label="Rooms"></nav>
 <div id="plan" class="hud" hidden>
-  <div class="wrap" id="planWrap"><img src="img/plan.jpg" alt="Top-down plan of A-105"><div id="cone"></div></div>
+  <div class="wrap" id="planWrap"><img src="img/plan.jpg?v=4" alt="Top-down plan of A-105"><div id="cone"></div></div>
   <div class="lbl"><span>Type 5 · 3BHK + Family</span><span>2,011 sq ft</span></div>
 </div>
 <div id="hint" class="hud" hidden>Drag to look around · tap the rings to move</div>
@@ -160,7 +160,7 @@ h1 em { font-style: italic; color: var(--gold); }
   <div class="intro-body">
     <div class="eyebrow">Vanshika's Nature's Harmony · Bengaluru</div>
     <h1>Residence <em>A&#8209;105</em></h1>
-    <p class="lede">Step inside a three-bedroom home with a family lounge, open to a balcony that runs the full length of the façade. Walk from the foyer to every room in a photoreal 360° tour.</p>
+    <p class="lede">Step inside a three-bedroom home with a family lounge, open to a balcony that runs the full length of the façade. Walk from the front door to every room in a photoreal 360° tour.</p>
     <div class="facts">
       <div><b>2,011</b>sq ft saleable</div>
       <div><b>3 + 1</b>bedrooms + family</div>
@@ -183,6 +183,8 @@ import * as THREE from "three";
 
 const S = 74, X = px => (px - 45) / S, Y = py => -(py - 160) / S;
 const NODES = {
+  entrance: { px: 1530, py: 522, name: "Entrance", size: "Three steps up to the front door", yaw: 180, pitch: -8,
+             text: "Three polished black-granite steps rise to a private landing in front of the walnut front door, past a framed leaf artwork, as in the sample flat." },
   foyer:   { px: 1020, py: 515, name: "Foyer", size: "9.35 x 7.81 ft", yaw: 180,
              text: "A fluted walnut wall with a Nero Marquina console and a brass-rimmed mirror. A walnut ceiling channel with concealed light leads you in." },
   living:  { px: 745, py: 440, name: "Living Room", size: "11.98 x 13.45 ft", yaw: 50,
@@ -203,8 +205,10 @@ const NODES = {
              text: "One balcony runs the full length of the façade, connecting the master suite, Bedroom 3, the living room and Bedroom 2. Teak decking and frameless glass look over the landscaped garden." }
 };
 // hotspot links: target node, optional 'via' marker position (plan px) at the doorway
+// optional 4th value: floor height of the marker relative to this node's floor (metres)
 const LINKS = {
-  foyer:   [["living", 900, 470], ["dining", 760, 560], ["kitchen", 1000, 600], ["br2", 1052, 420]],
+  entrance: [["foyer", 1150, 516, 0.48]],
+  foyer:   [["entrance", 1150, 516], ["living", 900, 470], ["dining", 760, 560], ["kitchen", 1000, 600], ["br2", 1052, 420]],
   living:  [["foyer", 1000, 510], ["dining", 740, 560], ["balcony", 782, 172], ["br3", 602, 472]],
   dining:  [["living", 790, 430], ["kitchen", 935, 655], ["foyer", 1020, 515], ["master", 372, 525], ["br3", 602, 472]],
   kitchen: [["dining", 900, 650], ["foyer", 1050, 540]],
@@ -214,7 +218,7 @@ const LINKS = {
   mbath:   [["master", 269, 300]],
   balcony: [["living", 782, 168], ["br3", 511, 168], ["br2", 1185, 168], ["master", 125, 168]]
 };
-const ORDER = ["foyer", "living", "balcony", "dining", "kitchen", "br3", "br2", "master", "mbath"];
+const ORDER = ["entrance", "foyer", "living", "balcony", "dining", "kitchen", "br3", "br2", "master", "mbath"];
 const EYE = 1.55;
 
 // ---------------------------------------------------------------- renderer + panorama spheres
@@ -240,7 +244,7 @@ function tex(url) {
   }, undefined, rej));
   return cache[url];
 }
-const V = "?v=3";
+const V = "?v=4";
 const small = id => `pano/${id}_s.jpg${V}`, big = id => `pano/${id}.jpg${V}`;
 
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 85 : 72; camera.updateProjectionMatrix(); fovBase = camera.fov; }
@@ -279,10 +283,10 @@ let hotspots = [];
 function buildHotspots(id) {
   hsBox.innerHTML = ""; hotspots = [];
   const n = NODES[id];
-  for (const [to, vx, vyy] of LINKS[id]) {
+  for (const [to, vx, vyy, dz = 0] of LINKS[id]) {
     const dx = X(vx) - X(n.px), dy = Y(vyy) - Y(n.py);
     const dist = Math.max(0.6, Math.hypot(dx, dy));
-    const v = new THREE.Vector3(dx, -EYE + 0.05, -dy).normalize().multiplyScalar(10);
+    const v = new THREE.Vector3(dx, -EYE + 0.05 + dz, -dy).normalize().multiplyScalar(10);
     const el = document.createElement("button"); el.className = "hs"; el.type = "button";
     el.setAttribute("aria-label", `Go to ${NODES[to].name}`);
     el.innerHTML = `<span class="ring"></span><span class="tag">${NODES[to].name}</span>`;
@@ -310,7 +314,7 @@ async function go(id, faceYaw) {
     zoom = zoom + (1 - zoom) * 0.12; if (k < 1) requestAnimationFrame(step); else res(); })(); });
   sA.material.map = t; sA.material.needsUpdate = true; sB.material.opacity = 0;
   zoom = 1;
-  if (faceYaw === undefined || !current) { yaw = n.yaw; pitch = -4; }
+  if (faceYaw === undefined || !current) { yaw = n.yaw; pitch = n.pitch ?? -4; }
   current = id; busy = false; buildHotspots(id); updateUI();
   tex(big(id)).then(tb => { if (current === id) { sA.material.map = tb; sA.material.needsUpdate = true; } load.hidden = true; }).catch(() => { load.hidden = true; });
   // warm the cache for neighbours
@@ -324,7 +328,7 @@ for (const id of ORDER) {
   const b = document.createElement("button"); b.className = "chip"; b.type = "button"; b.textContent = NODES[id].name; b.dataset.id = id;
   b.addEventListener("click", () => { stopAuto(); go(id); }); rooms.appendChild(b);
   const p = document.createElement("button"); p.className = "pin"; p.type = "button"; p.dataset.id = id; p.setAttribute("aria-label", NODES[id].name); p.title = NODES[id].name;
-  p.style.left = ((NODES[id].px - 30) / 1400 * 100) + "%"; p.style.top = ((NODES[id].py - 60) / 810 * 100) + "%";
+  p.style.left = ((NODES[id].px - 30) / 1540 * 100) + "%"; p.style.top = ((NODES[id].py - 60) / 810 * 100) + "%";
   p.addEventListener("click", () => { stopAuto(); go(id); }); planWrap.appendChild(p);
 }
 function updateUI() {
@@ -332,7 +336,7 @@ function updateUI() {
   cName.textContent = n.name; cSize.textContent = n.size; cText.textContent = n.text;
   rooms.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-current", c.dataset.id === current));
   planWrap.querySelectorAll(".pin").forEach(c => c.setAttribute("aria-current", c.dataset.id === current));
-  cone.style.left = ((n.px - 30) / 1400 * 100) + "%"; cone.style.top = ((n.py - 60) / 810 * 100) + "%";
+  cone.style.left = ((n.px - 30) / 1540 * 100) + "%"; cone.style.top = ((n.py - 60) / 810 * 100) + "%";
   const chip = rooms.querySelector(`[data-id="${current}"]`); if (chip) chip.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
 }
 const plan = document.getElementById("plan"), bPlan = document.getElementById("bPlan");
@@ -366,9 +370,9 @@ function hideHint() { hint.style.opacity = 0; clearTimeout(hintTimer); hintTimer
 // ---------------------------------------------------------------- intro
 const slides = [...document.querySelectorAll(".slide")]; let si = 0;
 const slideTimer = setInterval(() => { slides[si].classList.remove("on"); si = (si + 1) % slides.length; slides[si].classList.add("on"); }, 5200);
-tex(small("foyer")).catch(() => {});
+tex(small("entrance")).catch(() => {});
 document.getElementById("go").addEventListener("click", async () => {
-  await go("foyer");
+  await go("entrance");
   document.getElementById("intro").classList.add("gone"); clearInterval(slideTimer);
   for (const id of ["top", "caption", "rooms", "hint"]) document.getElementById(id).hidden = false;
   if (innerWidth >= 1100) plan.hidden = false;
