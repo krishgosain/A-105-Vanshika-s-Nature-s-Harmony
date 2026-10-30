@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Walk Residence A-105</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed real-time canvas; HUD in corners; start card centred. Same visual language as the 360 tour. */
+:root {
+  --night: #0e0c0a; --ink: #f4efe6; --ink-dim: #c2b7a6; --gold: #c9a46a;
+  --glass: rgba(16, 13, 10, 0.6); --line: rgba(244, 239, 230, 0.16);
+  --serif: "Cormorant Garamond", Georgia, serif; --sans: "Manrope", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--night); color: var(--ink); font-family: var(--sans); overflow: hidden; touch-action: none; }
+#view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: fixed; z-index: 5; pointer-events: none; }
+#room { top: calc(16px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); text-shadow: 0 2px 16px rgba(0,0,0,.6); }
+#room .k { font-size: .62rem; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+#room .name { font-family: var(--serif); font-size: 2rem; line-height: 1.05; margin-top: 4px; }
+#room .size { font-size: .78rem; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+#tools { top: calc(16px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); display: flex; gap: 8px; pointer-events: auto; }
+.btn { border: 1px solid var(--line); background: var(--glass); color: var(--ink); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px; padding: 9px 14px; font: 600 .78rem var(--sans); cursor: pointer; text-decoration: none; }
+.btn:hover, .btn:focus-visible { border-color: var(--gold); outline: none; }
+#map { right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: min(300px, 38vw); aspect-ratio: 1400 / 810;
+  border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--glass); }
+#map img { width: 100%; height: 100%; display: block; opacity: .9; object-fit: cover; }
+#dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px rgba(201,164,106,.35); }
+#cone { position: absolute; width: 0; height: 0; margin: -18px 0 0 -9px; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 18px solid rgba(201,164,106,.55); transform-origin: 9px 18px; }
+#jump { left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; flex-wrap: wrap; gap: 6px; max-width: min(58vw, 560px); pointer-events: auto; }
+#help { left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); font-size: .72rem; color: var(--ink-dim); letter-spacing: .04em; text-align: center; }
+#start { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 0 max(20px, env(safe-area-inset-left, 0px));
+  background: radial-gradient(ellipse at 50% 40%, rgba(14,12,10,.5), rgba(14,12,10,.94)); }
+.card { max-width: 540px; width: 100%; display: grid; gap: 14px; }
+.eyebrow { font: 600 .7rem var(--sans); letter-spacing: .3em; text-transform: uppercase; color: var(--gold); }
+h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(2.8rem, 9vw, 4.6rem); line-height: .95; }
+.sub { color: var(--ink-dim); line-height: 1.6; }
+#go { justify-self: start; background: var(--gold); color: #1a130b; border-color: transparent; padding: 13px 22px; font-size: .92rem; }
+#go[disabled] { opacity: .65; cursor: progress; }
+#stick { position: fixed; z-index: 6; width: 110px; height: 110px; border-radius: 50%; border: 1px solid var(--line); background: rgba(16,13,10,.4); display: none; pointer-events: none; }
+#knob { position: absolute; left: 35px; top: 35px; width: 40px; height: 40px; border-radius: 50%; background: rgba(201,164,106,.75); }
+@media (max-width: 700px) { #help { display: none; } #map { width: 42vw; } #jump { max-width: 52vw; } #room .name { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<canvas id="view" aria-label="First-person view of Residence A-105"></canvas>
+<div id="room" class="hud" aria-live="polite"><div class="k">Residence A-105</div><div class="name">Entrance</div><div class="size">Outside the front door</div></div>
+<div id="tools" class="hud"><a class="btn" href="index.html">360° tour</a></div>
+<div id="map" class="hud"><img src="img/plan.jpg" alt="Plan of A-105 showing your position"><div id="cone"></div><div id="dot"></div></div>
+<div id="jump" class="hud" aria-label="Jump to a room"></div>
+<div id="help" class="hud">WASD or arrows to move · drag or click to look · Shift to walk faster</div>
+<div id="stick"><div id="knob"></div></div>
+<div id="start">
+  <div class="card">
+    <div class="eyebrow">Vanshika's Nature's Harmony · Bengaluru</div>
+    <h1>Walk through A&#8209;105</h1>
+    <div class="sub">Move through the home at your own pace in real time, from the front door to the balcony. For the highest image quality, take the 360° tour.</div>
+    <button id="go" class="btn" disabled>Loading the home…</button>
+    <div class="sub" id="keys" style="font-size:.8rem">Desktop: click to look around, WASD to walk. Phone: drag the left half to walk, the right half to look.</div>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const SIZES = { "Living": "11.98 x 13.45 ft", "Family & Dining": "20.87 x 11.48 ft", "Foyer": "9.35 x 7.81 ft", "Kitchen": "9.35 x 7.61 ft",
+  "Utility": "8.83 x 3.94 ft", "Bedroom 2": "10.99 x 12.12 ft", "Bedroom 3": "11.32 x 13.12 ft", "Master Bedroom": "13.45 x 11.48 ft",
+  "Master Bath": "7.87 x 4.92 ft", "Bath 2": "4.92 x 8.86 ft", "Bath 3": "4.92 x 7.87 ft", "Balcony": "Runs the full façade",
+  "Master Balcony": "5.05 x 5.12 ft", "Entrance": "Outside the front door" };
+const JUMPS = [["Entrance", 1250, 522, 180], ["Living", 745, 445, 120], ["Dining", 760, 560, 230], ["Kitchen", 960, 655, 0],
+  ["Bedroom 2", 1100, 360, 20], ["Bedroom 3", 610, 400, 160], ["Master", 330, 520, 165], ["Balcony", 690, 110, 0]];
+const S = 74, px2x = px => (px - 45) / S, py2y = py => -(py - 160) / S;
+
+const canvas = document.getElementById("view");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, logarithmicDepthBuffer: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0xd9e3e8);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(70, 1, 0.08, 300);
+scene.add(new THREE.HemisphereLight(0xfff1e0, 0x8c8072, 0.9));
+const sun = new THREE.DirectionalLight(0xffe8cc, 1.4); sun.position.set(-8, 16, 14); scene.add(sun);
+
+let colliders = [], rooms = {}, ready = false;
+const player = { x: 0, y: 0, yaw: Math.PI, pitch: 0, eye: 1.6, r: 0.22 };
+function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+
+const go = document.getElementById("go");
+const draco = new DRACOLoader(); draco.setDecoderPath("lib/draco/");
+const gl = new GLTFLoader(); gl.setDRACOLoader(draco);
+Promise.all([
+  fetch("model/layout.json").then(r => r.json()),
+  new Promise((res, rej) => gl.load("model/a105.glb", res, ev => { if (ev.total) go.textContent = `Loading the home… ${Math.round(100 * ev.loaded / ev.total)}%`; }, rej))
+]).then(([lay, gltf]) => {
+  colliders = lay.colliders; rooms = lay.rooms;
+  gltf.scene.traverse(o => {
+    if (!o.isMesh || !o.material) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of mats) {
+      const n = m.name || "";
+      m.envMapIntensity = /marble|mirror|brass|chrome|glass|lacquer|screen|black_metal|porcelain/.test(n) ? 1.0 : 0.45;
+      if (/glass|sheer/.test(n)) { m.depthWrite = false; m.side = THREE.DoubleSide; }
+      if (/^led|opal/.test(n)) { m.emissiveIntensity = Math.min(m.emissiveIntensity || 1, 3); m.toneMapped = false; }
+      if (/backdrop/.test(n)) { m.emissiveIntensity = 1.0; m.toneMapped = false; }
+    }
+  });
+  scene.add(gltf.scene);
+  // warm downlights: real lights in the main rooms, the rest are emissive
+  const S2 = lay.spots || [];
+  S2.forEach((p, i) => { if (i % 6 === 0) { const L = new THREE.PointLight(0xffd6a6, 4.5, 6.5, 2); L.position.set(p[0], lay.ceiling - 0.35, -p[1]); scene.add(L); } });
+  teleport(JUMPS[0]); buildJumps(); ready = true;
+  go.disabled = false; go.textContent = "Enter the home";
+}).catch(err => { go.textContent = "The home didn't load. Reload the page to try again."; console.error(err); });
+
+function teleport([n, px, py, yd]) { player.x = px2x(px); player.y = py2y(py); player.yaw = yd * Math.PI / 180; player.pitch = 0; }
+function buildJumps() {
+  const box = document.getElementById("jump");
+  for (const j of JUMPS) { const b = document.createElement("button"); b.className = "btn"; b.type = "button"; b.textContent = j[0];
+    b.addEventListener("click", e => { e.stopPropagation(); teleport(j); }); box.appendChild(b); }
+}
+// input
+const keys = new Set();
+addEventListener("keydown", e => { keys.add(e.code); if (e.code.startsWith("Arrow")) e.preventDefault(); });
+addEventListener("keyup", e => keys.delete(e.code));
+const isTouch = matchMedia("(pointer: coarse)").matches;
+let locked = false, dragLook = null;
+const lock = () => { if (isTouch) return; try { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {} };
+go.addEventListener("click", () => { document.getElementById("start").hidden = true; lock(); });
+canvas.addEventListener("click", () => { if (!locked) lock(); });
+document.addEventListener("pointerlockchange", () => locked = document.pointerLockElement === canvas);
+addEventListener("mousemove", e => { if (locked) look(e.movementX, e.movementY); else if (dragLook && !isTouch) { look(e.clientX - dragLook.x, e.clientY - dragLook.y); dragLook = { x: e.clientX, y: e.clientY }; } });
+canvas.addEventListener("mousedown", e => { if (!locked) dragLook = { x: e.clientX, y: e.clientY }; });
+addEventListener("mouseup", () => dragLook = null);
+function look(dx, dy) { player.yaw -= dx * 0.0024; player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch - dy * 0.0024)); }
+const stick = document.getElementById("stick"), knob = document.getElementById("knob");
+let mT = null, lT = null, joy = { x: 0, y: 0 };
+canvas.addEventListener("touchstart", e => { for (const t of e.changedTouches) {
+  if (t.clientX < innerWidth / 2 && !mT) { mT = { id: t.identifier, x: t.clientX, y: t.clientY }; stick.style.display = "block"; stick.style.left = (t.clientX - 55) + "px"; stick.style.top = (t.clientY - 55) + "px"; }
+  else if (!lT) lT = { id: t.identifier, x: t.clientX, y: t.clientY }; } }, { passive: true });
+canvas.addEventListener("touchmove", e => { for (const t of e.changedTouches) {
+  if (mT && t.identifier === mT.id) { let dx = t.clientX - mT.x, dy = t.clientY - mT.y; const d = Math.hypot(dx, dy), m = 45; if (d > m) { dx *= m / d; dy *= m / d; }
+    joy = { x: dx / m, y: dy / m }; knob.style.left = (35 + dx) + "px"; knob.style.top = (35 + dy) + "px"; }
+  else if (lT && t.identifier === lT.id) { look((t.clientX - lT.x) * 1.6, (t.clientY - lT.y) * 1.6); lT.x = t.clientX; lT.y = t.clientY; } } }, { passive: true });
+const endT = e => { for (const t of e.changedTouches) { if (mT && t.identifier === mT.id) { mT = null; joy = { x: 0, y: 0 }; stick.style.display = "none"; knob.style.left = knob.style.top = "35px"; } if (lT && t.identifier === lT.id) lT = null; } };
+canvas.addEventListener("touchend", endT); canvas.addEventListener("touchcancel", endT);
+if (isTouch) document.getElementById("keys").textContent = "Drag the left half of the screen to walk and the right half to look around.";
+// collision (circle vs plan rectangles, metres)
+function blocked(x, y) { const r = player.r; for (const c of colliders) {
+  const x0 = Math.min(c[0], c[2]), x1 = Math.max(c[0], c[2]), y0 = Math.min(c[1], c[3]), y1 = Math.max(c[1], c[3]);
+  const cx = Math.max(x0, Math.min(x, x1)), cy = Math.max(y0, Math.min(y, y1)); if ((x - cx) ** 2 + (y - cy) ** 2 < r * r) return true; } return false; }
+function roomAt(x, y) { for (const [n, c] of Object.entries(rooms)) { const x0 = Math.min(c[0], c[2]), x1 = Math.max(c[0], c[2]), y0 = Math.min(c[1], c[3]), y1 = Math.max(c[1], c[3]);
+  if (x >= x0 && x <= x1 && y >= y0 && y <= y1) return n; } return null; }
+const roomEl = document.querySelector("#room .name"), sizeEl = document.querySelector("#room .size");
+const dot = document.getElementById("dot"), cone = document.getElementById("cone"), mapEl = document.getElementById("map");
+let last = performance.now(), lastRoom = "", bob = 0;
+function tick(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (ready) {
+    let f = 0, s = 0;
+    if (keys.has("KeyW") || keys.has("ArrowUp")) f += 1; if (keys.has("KeyS") || keys.has("ArrowDown")) f -= 1;
+    if (keys.has("KeyA")) s -= 1; if (keys.has("KeyD")) s += 1;
+    if (keys.has("ArrowLeft")) player.yaw += 1.8 * dt; if (keys.has("ArrowRight")) player.yaw -= 1.8 * dt;
+    f -= joy.y; s += joy.x;
+    const len = Math.hypot(f, s);
+    if (len > 0) {
+      const sp = (keys.has("ShiftLeft") || keys.has("ShiftRight") ? 2.6 : 1.4) * Math.min(1, len) / Math.max(len, 1);
+      const cy = Math.cos(player.yaw), sy = Math.sin(player.yaw);
+      const dx = (f * cy + s * sy) * sp * dt, dy = (f * sy - s * cy) * sp * dt;
+      if (!blocked(player.x + dx, player.y)) player.x += dx; if (!blocked(player.x, player.y + dy)) player.y += dy;
+      bob += dt * sp * 6;
+    }
+    const eye = player.eye + Math.sin(bob) * 0.01;
+    camera.position.set(player.x, eye, -player.y);
+    const cp = Math.cos(player.pitch);
+    camera.lookAt(player.x + Math.cos(player.yaw) * cp, eye + Math.sin(player.pitch), -(player.y + Math.sin(player.yaw) * cp));
+    const room = roomAt(player.x, player.y) || lastRoom || "Entrance";
+    if (room !== lastRoom) { roomEl.textContent = room; sizeEl.textContent = SIZES[room] || ""; lastRoom = room; }
+    const px = player.x * S + 45, py = -player.y * S + 160, W = mapEl.clientWidth, Hh = mapEl.clientHeight;
+    const mx = (px - 30) / 1400 * W, my = (py - 60) / 810 * Hh;
+    dot.style.left = cone.style.left = mx + "px"; dot.style.top = cone.style.top = my + "px";
+    cone.style.transform = `rotate(${90 - player.yaw * 180 / Math.PI}deg)`;
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

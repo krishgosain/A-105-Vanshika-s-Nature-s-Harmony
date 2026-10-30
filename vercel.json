@@ -1,1 +1,8 @@
-{ "cleanUrls": true, "headers": [ { "source": "/a105.json", "headers": [ { "key": "Cache-Control", "value": "public, max-age=86400" } ] } ] }
+{
+  "cleanUrls": true,
+  "headers": [
+    { "source": "/pano/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=604800, immutable" } ] },
+    { "source": "/model/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=604800" } ] },
+    { "source": "/lib/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=2592000, immutable" } ] }
+  ]
+}

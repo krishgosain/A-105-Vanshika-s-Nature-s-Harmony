@@ -3,301 +3,398 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>A-105 Walkthrough</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<title>Residence A-105 · Vanshika's Nature's Harmony</title>
+<meta name="description" content="Step inside Residence A-105 at Vanshika's Nature's Harmony, Bengaluru. A photoreal 360° tour of the Type 5 3BHK + Family home.">
+<meta property="og:title" content="Residence A-105 · 360° Tour">
+<meta property="og:image" content="img/hero_living.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600&display=swap">
 <style>
-/* Layout: full-bleed 3D canvas; HUD pinned to corners; start card centred over a dimmed view. */
+/* Layout: full-bleed imagery; intro hero, then a 360 stage with HUD pinned to the edges. Single dark look. */
 :root {
-  --ink: #f3ede4;          /* warm off-white text */
-  --ink-dim: #b8ad9e;
-  --night: #15120f;        /* charcoal with a bronze bias, like the TV-wall wallpaper */
-  --glass: rgba(24, 20, 16, 0.72);
-  --brass: #d4a35b;        /* LED-strip warmth */
-  --line: rgba(243, 237, 228, 0.16);
-  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --night: #0e0c0a;            /* warm black, like smoked walnut */
+  --ink: #f4efe6;              /* ivory text */
+  --ink-dim: #c2b7a6;
+  --gold: #c9a46a;             /* brushed brass */
+  --glass: rgba(16, 13, 10, 0.58);
+  --line: rgba(244, 239, 230, 0.16);
+  --serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --sans: "Manrope", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   color-scheme: dark;
 }
+* { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html, body { height: 100%; }
-body { margin: 0; background: var(--night); color: var(--ink); font-family: var(--display); overflow: hidden; touch-action: none; }
-#view { position: fixed; inset: 0; display: block; width: 100%; height: 100%; }
-.hud { position: fixed; pointer-events: none; z-index: 5; }
-#room {
-  top: calc(16px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
-  background: var(--glass); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); min-width: 0; max-width: calc(100vw - 32px);
+html, body { height: 100%; margin: 0; }
+body { background: var(--night); color: var(--ink); font-family: var(--sans); overflow: hidden; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+
+/* ---------- intro */
+#intro { position: fixed; inset: 0; z-index: 20; overflow: hidden; transition: opacity .9s ease; }
+#intro.gone { opacity: 0; pointer-events: none; }
+.slide { position: absolute; inset: -4%; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.8s ease; animation: drift 18s ease-in-out infinite alternate; }
+.slide.on { opacity: 1; }
+@keyframes drift { from { transform: scale(1.0) translate3d(0,0,0); } to { transform: scale(1.08) translate3d(-1.5%, -1%, 0); } }
+#intro::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,12,10,.15) 0%, rgba(14,12,10,.1) 40%, rgba(14,12,10,.88) 100%); }
+.intro-body { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0;
+  padding: 0 max(24px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
+  display: grid; gap: 18px; max-width: 980px; }
+.eyebrow { font: 600 .72rem var(--sans); letter-spacing: .32em; text-transform: uppercase; color: var(--gold); }
+h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(3.2rem, 10vw, 7.4rem); line-height: .9; letter-spacing: -.01em; text-wrap: balance; }
+h1 em { font-style: italic; color: var(--gold); }
+.lede { max-width: 52ch; color: var(--ink-dim); font-size: 1.02rem; line-height: 1.65; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: .82rem; color: var(--ink-dim); }
+.facts b { display: block; font-family: var(--serif); font-weight: 600; font-size: 1.6rem; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+.btn { border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px; padding: 13px 22px; font-weight: 600; font-size: .9rem; letter-spacing: .02em; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; color: var(--ink); }
+.btn.primary { background: var(--gold); color: #1a130b; border-color: transparent; }
+.btn:hover { border-color: var(--gold); }
+.btn:focus-visible, .chip:focus-visible, .hs:focus-visible, .icon:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.note { font-size: .72rem; color: rgba(194,183,166,.75); letter-spacing: .04em; }
+
+/* ---------- stage */
+#stage { position: fixed; inset: 0; }
+#stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+#stage canvas:active { cursor: grabbing; }
+#veil { position: fixed; inset: 0; background: var(--night); opacity: 0; pointer-events: none; transition: opacity .45s ease; z-index: 4; }
+#veil.on { opacity: 1; }
+.hud { position: fixed; z-index: 6; }
+#top { top: calc(14px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; pointer-events: none; }
+.brand { pointer-events: auto; font-family: var(--serif); font-size: 1.25rem; letter-spacing: .02em; display: flex; align-items: baseline; gap: 10px; }
+.brand small { font-family: var(--sans); font-size: .64rem; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
+.tools { display: flex; gap: 8px; pointer-events: auto; }
+.icon { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  display: grid; place-items: center; cursor: pointer; }
+.icon svg { width: 18px; height: 18px; stroke: var(--ink); fill: none; stroke-width: 1.6; }
+.icon[aria-pressed="true"] { border-color: var(--gold); }
+.icon[aria-pressed="true"] svg { stroke: var(--gold); }
+#caption { left: max(20px, env(safe-area-inset-left, 0px)); bottom: calc(92px + env(safe-area-inset-bottom, 0px)); max-width: min(520px, calc(100vw - 40px)); pointer-events: none;
+  text-shadow: 0 2px 18px rgba(0,0,0,.55); }
+#caption .k { font: 600 .66rem var(--sans); letter-spacing: .3em; text-transform: uppercase; color: var(--gold); }
+#caption h2 { margin: 6px 0 4px; font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1; }
+#caption .size { font-size: .8rem; color: var(--ink-dim); letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+#caption p { margin: 10px 0 0; font-size: .92rem; line-height: 1.6; color: var(--ink); opacity: .92; }
+#rooms { left: 0; right: 0; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+  padding: 4px max(16px, env(safe-area-inset-right, 0px)) 4px max(16px, env(safe-area-inset-left, 0px)); }
+#rooms::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px; padding: 10px 16px; font-size: .82rem; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.chip[aria-current="true"] { background: var(--ink); color: #15110c; border-color: transparent; }
+#plan { right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(80px + env(safe-area-inset-bottom, 0px)); width: min(300px, 28vw);
+  border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: rgba(16,13,10,.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+#plan .wrap { position: relative; aspect-ratio: 1400 / 810; }
+#plan img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .9; }
+#plan .pin { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid var(--ink); background: rgba(14,12,10,.7); cursor: pointer; padding: 0; }
+#plan .pin[aria-current="true"] { background: var(--gold); border-color: var(--gold); }
+#cone { position: absolute; width: 70px; height: 70px; margin: -35px 0 0 -35px; pointer-events: none;
+  background: conic-gradient(from -35deg, rgba(201,164,106,.55), rgba(201,164,106,0) 70deg, transparent 0); border-radius: 50%; transform-origin: 50% 50%; }
+#plan .lbl { display: flex; justify-content: space-between; padding: 8px 12px; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); }
+.hs { position: absolute; z-index: 5; transform: translate(-50%, -50%); background: none; border: 0; padding: 0; cursor: pointer; display: grid; justify-items: center; gap: 8px; }
+.hs .ring { width: 54px; height: 54px; border-radius: 50%; border: 2px solid rgba(244,239,230,.9); background: radial-gradient(circle, rgba(201,164,106,.55) 0 28%, rgba(14,12,10,.25) 30%);
+  box-shadow: 0 0 0 0 rgba(201,164,106,.6); animation: pulse 2.4s ease-out infinite; transform: perspective(300px) rotateX(58deg); }
+.hs .tag { font-size: .74rem; font-weight: 600; letter-spacing: .08em; background: rgba(14,12,10,.65); border: 1px solid var(--line); padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
+.hs:hover .ring { border-color: var(--gold); }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(201,164,106,.55); } 70% { box-shadow: 0 0 0 22px rgba(201,164,106,0); } 100% { box-shadow: 0 0 0 0 rgba(201,164,106,0); } }
+#hint { left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; padding: 12px 18px; border-radius: 999px; background: var(--glass); border: 1px solid var(--line);
+  font-size: .82rem; letter-spacing: .06em; transition: opacity .8s ease; }
+#credits { right: max(16px, env(safe-area-inset-right, 0px)); top: calc(66px + env(safe-area-inset-top, 0px)); width: min(360px, calc(100vw - 32px)); padding: 16px 18px; border-radius: 14px;
+  background: rgba(16,13,10,.9); border: 1px solid var(--line); font-size: .78rem; line-height: 1.6; color: var(--ink-dim); }
+#credits h3 { margin: 0 0 6px; font-family: var(--serif); font-weight: 500; font-size: 1.3rem; color: var(--ink); }
+#credits a { color: var(--gold); }
+#load { position: fixed; left: 50%; bottom: calc(130px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 7; width: 160px; height: 2px; background: var(--line); overflow: hidden; border-radius: 2px; }
+#load i { display: block; height: 100%; width: 40%; background: var(--gold); animation: bar 1.1s ease-in-out infinite; }
+@keyframes bar { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@media (max-width: 1100px) { #plan { width: min(320px, 46vw); } }
+@media (max-width: 700px) {
+  #caption { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  #caption p { display: none; }
+  #plan { width: 46vw; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+  .hs .ring { width: 44px; height: 44px; }
 }
-#room .name { font-weight: 600; font-size: 1.05rem; letter-spacing: 0.01em; }
-#room .size { font-family: var(--mono); font-size: 0.75rem; color: var(--brass); margin-top: 2px; }
-#map {
-  right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  width: min(34vw, 300px); aspect-ratio: 1400 / 810; max-width: 100%;
-  border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--glass);
-}
-#map img { width: 100%; height: 100%; display: block; opacity: 0.92; }
-#dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 0 3px rgba(212,163,91,0.35); }
-#cone { position: absolute; width: 0; height: 0; margin: -18px 0 0 -9px; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 18px solid rgba(212,163,91,0.55); transform-origin: 9px 18px; }
-#jump {
-  pointer-events: auto; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  display: flex; flex-wrap: wrap; gap: 6px; max-width: min(56vw, 520px);
-}
-#jump button, .btn {
-  font: 600 0.78rem var(--display); color: var(--ink); background: var(--glass); border: 1px solid var(--line);
-  border-radius: 999px; padding: 7px 12px; cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-}
-#jump button:hover, #jump button:focus-visible { border-color: var(--brass); outline: none; color: #fff; }
-#help { top: calc(16px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); font-family: var(--mono); font-size: 0.7rem; color: var(--ink-dim); text-align: right; line-height: 1.6; background: var(--glass); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
-#start {
-  position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  background: radial-gradient(ellipse at 50% 40%, rgba(21,18,15,0.55), rgba(21,18,15,0.92));
-}
-.card { max-width: 520px; width: 100%; display: grid; gap: 14px; }
-.eyebrow { font: 600 0.72rem var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--brass); }
-h1 { margin: 0; font-weight: 800; font-size: clamp(2.6rem, 9vw, 4.6rem); line-height: 0.95; letter-spacing: -0.02em; text-wrap: balance; }
-.sub { color: var(--ink-dim); font-size: 1rem; line-height: 1.5; max-width: 46ch; }
-.specs { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--mono); font-size: 0.75rem; }
-.specs span { border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
-#go { justify-self: start; font-size: 1rem; padding: 12px 22px; background: var(--brass); color: #1b140c; border-color: transparent; }
-#go:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-#go[disabled] { opacity: 0.6; cursor: progress; }
-.keys { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-dim); line-height: 1.7; }
-#stick { position: fixed; z-index: 6; width: 110px; height: 110px; border-radius: 50%; border: 1px solid var(--line); background: rgba(24,20,16,0.4); display: none; pointer-events: none; }
-#knob { position: absolute; left: 35px; top: 35px; width: 40px; height: 40px; border-radius: 50%; background: rgba(212,163,91,0.7); }
-@media (max-width: 640px) { #help { display: none; } #map { width: 44vw; } #jump { max-width: 50vw; } }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { .slide { animation: none; } .hs .ring { animation: none; } }
 </style>
 </head>
 <body>
 
+<div id="stage"><canvas id="c" aria-label="360 degree view of the current room. Drag to look around."></canvas></div>
+<div id="veil"></div>
+<div id="hotspots"></div>
 
-<canvas id="view" aria-label="First-person view of flat A-105"></canvas>
-
-<div id="room" class="hud" aria-live="polite"><div class="name">Entrance</div><div class="size">Flat A-105</div></div>
-<div id="help" class="hud">WASD / arrows &middot; move<br>mouse &middot; look &middot; Shift &middot; walk faster<br>Esc &middot; release mouse</div>
-<div id="map" class="hud"><img id="mapimg" src="minimap.png" alt="Top-down plan of A-105 showing your position"><div id="cone"></div><div id="dot"></div></div>
-<div id="jump" class="hud" aria-label="Jump to a room"></div>
-<div id="stick"><div id="knob"></div></div>
-
-<div id="start">
-  <div class="card">
-    <div class="eyebrow">Vanshika's Nature's Harmony &middot; Bengaluru</div>
-    <h1>Flat A-105</h1>
-    <div class="sub">A walkable model of the Type 5 unit, built from the published floor plan and the sample-flat walkthrough video. Start at the front door and explore every room.</div>
-    <div class="specs"><span>3BHK + Family</span><span>2,011 sq ft saleable</span><span>3 balconies</span><span>3 toilets</span></div>
-    <button id="go" class="btn" disabled>Loading model…</button>
-    <div class="keys" id="keys">Desktop: click to look around, WASD to walk, Shift to walk faster.<br>Phone: drag the left half to walk, the right half to look.</div>
+<div id="top" class="hud" hidden>
+  <div class="brand">A-105 <small>Nature's Harmony</small></div>
+  <div class="tools">
+    <button class="icon" id="bPlan" aria-pressed="true" title="Floor plan" aria-label="Show floor plan"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 11h8V4M11 15h10M15 15v5"/></svg></button>
+    <button class="icon" id="bAuto" aria-pressed="false" title="Guided tour" aria-label="Play guided tour"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></button>
+    <button class="icon" id="bGyro" aria-pressed="false" title="Look with your phone" aria-label="Look around by moving your phone" hidden><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M3 9c-1.5 2-1.5 4 0 6M21 9c1.5 2 1.5 4 0 6"/></svg></button>
+    <a class="icon" id="bWalk" href="walk.html" title="Walk freely" aria-label="Walk through the home freely"><svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2.2-6.2L15 17v4M9 12l2-4.5 3.5 2.5 2.5 1M11 7.5L8 10v3"/></svg></a>
+    <button class="icon" id="bFull" title="Full screen" aria-label="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button class="icon" id="bInfo" aria-pressed="false" title="About this tour" aria-label="About this tour"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button>
   </div>
 </div>
 
+<div id="caption" class="hud" hidden aria-live="polite">
+  <div class="k">Design concept</div>
+  <h2 id="cName">Foyer</h2>
+  <div class="size" id="cSize"></div>
+  <p id="cText"></p>
+</div>
+<nav id="rooms" class="hud" hidden aria-label="Rooms"></nav>
+<div id="plan" class="hud" hidden>
+  <div class="wrap" id="planWrap"><img src="img/plan.jpg" alt="Top-down plan of A-105"><div id="cone"></div></div>
+  <div class="lbl"><span>Type 5 · 3BHK + Family</span><span>2,011 sq ft</span></div>
+</div>
+<div id="hint" class="hud" hidden>Drag to look around · tap the rings to move</div>
+<div id="load" hidden><i></i></div>
+<aside id="credits" class="hud" hidden>
+  <h3>About this tour</h3>
+  The layout follows the published Type 5 floor plan of Vanshika's Nature's Harmony; the walls are traced to scale. Furniture, finishes and lighting are a luxury design concept, not the builder's specification.
+  <br><br>Rendered with Blender Cycles. Furniture models: GlamVelvetSofa and SheenChair © Wayfair, Potted Plant © DGG / Poly Haven, glassware © Wayfair, Ed Mackey and Khronos contributors, all under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> via the Khronos glTF Sample Assets. Garden views from the project's own walkthrough film.
+</aside>
+
+<section id="intro">
+  <div class="slide on" style="background-image:url(img/hero_living.jpg)"></div>
+  <div class="slide" style="background-image:url(img/hero_dining.jpg)"></div>
+  <div class="slide" style="background-image:url(img/hero_master.jpg)"></div>
+  <div class="slide" style="background-image:url(img/hero_kitchen.jpg)"></div>
+  <div class="intro-body">
+    <div class="eyebrow">Vanshika's Nature's Harmony · Bengaluru</div>
+    <h1>Residence <em>A&#8209;105</em></h1>
+    <p class="lede">Step inside a three-bedroom home with a family lounge, open to a balcony that runs the full length of the façade. Walk from the foyer to every room in a photoreal 360° tour.</p>
+    <div class="facts">
+      <div><b>2,011</b>sq ft saleable</div>
+      <div><b>3 + 1</b>bedrooms + family</div>
+      <div><b>3</b>bathrooms</div>
+      <div><b>1</b>continuous balcony</div>
+    </div>
+    <div class="cta">
+      <button class="btn primary" id="go" type="button">Begin the 360° tour</button>
+      <a class="btn" href="walk.html">Walk through freely</a>
+    </div>
+    <div class="note">Design visualisation. Furnishing and finishes are illustrative.</div>
+  </div>
+</section>
+
 <script type="importmap">
-{ "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-} }
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
 </script>
 <script type="module">
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
-const SIZES = {
-  "Living": "11.98 x 13.45 ft", "Family & Dining": "20.87 x 11.48 ft", "Foyer": "9.35 x 7.81 ft",
-  "Kitchen": "9.35 x 7.61 ft", "Utility": "8.83 x 3.94 ft", "Bedroom 2": "10.99 x 12.12 ft",
-  "Bedroom 3": "11.32 x 13.12 ft", "Master Bedroom": "13.45 x 11.48 ft", "Toilet 1": "7.87 x 4.92 ft",
-  "Toilet 2": "4.92 x 8.86 ft", "Toilet 3": "4.92 x 7.87 ft", "Balcony": "19.55 x 3.28 ft",
-  "Bedroom 2 Balcony": "10.99 x 3.28 ft", "Master Balcony": "5.05 x 5.12 ft", "Entrance": "Outside the front door"
+const S = 74, X = px => (px - 45) / S, Y = py => -(py - 160) / S;
+const NODES = {
+  foyer:   { px: 1020, py: 515, name: "Foyer", size: "9.35 x 7.81 ft", yaw: 180,
+             text: "A fluted walnut wall with a Nero Marquina console and a brass-rimmed mirror. A walnut ceiling channel with concealed light leads you in." },
+  living:  { px: 745, py: 440, name: "Living Room", size: "11.98 x 13.45 ft", yaw: 50,
+             text: "A book-matched Calacatta slab framed in fluted walnut, an emerald velvet sofa and bouclé lounge chairs under a halo chandelier. Floor-to-ceiling glass opens to the balcony." },
+  dining:  { px: 740, py: 560, name: "Family & Dining", size: "20.87 x 11.48 ft", yaw: 215,
+             text: "A Calacatta table on fluted walnut pedestals, cognac leather chairs and a linear opal chandelier. Beside it, a backlit bar in bronze fluted glass." },
+  kitchen: { px: 1010, py: 655, name: "Kitchen", size: "9.35 x 7.61 ft", yaw: 0,
+             text: "A Calacatta waterfall counter, taupe handleless cabinetry and fluted bronze-glass wall units with a soft inner glow. A brass gooseneck tap finishes the sink." },
+  br2:     { px: 1110, py: 330, name: "Bedroom 2", size: "10.99 x 12.12 ft", yaw: 10,
+             text: "Warm oak panelling and a grey chevron headboard from the sample flat, with opal pendants and its own stretch of balcony." },
+  br3:     { px: 575, py: 340, name: "Bedroom 3", size: "11.32 x 13.12 ft", yaw: 175,
+             text: "A charcoal channel-tufted headboard wall with an ivory gallery panel above, a bouclé bench and linen drapes that soften the light from the balcony." },
+  master:  { px: 300, py: 470, name: "Master Bedroom", size: "13.45 x 11.48 ft", yaw: 170,
+             text: "Herringbone oak underfoot and a full-height velvet channel headboard. Bronze-glass wardrobes glow from within, and a cognac velvet reading chair sits by the private balcony." },
+  mbath:   { px: 300, py: 245, name: "Master Bath", size: "7.87 x 4.92 ft", yaw: 180,
+             text: "A Nero Marquina feature wall, a floating walnut vanity with a vessel basin, and brass fittings under a rain shower." },
+  balcony: { px: 690, py: 110, name: "Balcony", size: "Full-length façade balcony", yaw: 0,
+             text: "One balcony runs the full length of the façade, connecting the master suite, Bedroom 3, the living room and Bedroom 2. Teak decking and frameless glass look over the landscaped garden." }
 };
-const JUMPS = [["Entrance", 1250, 522, 180], ["Living", 840, 450, 140], ["Dining", 700, 560, 235], ["Kitchen", 960, 650, 0],
-  ["Bedroom 2", 1090, 360, 20], ["Bedroom 3", 610, 380, 165], ["Master", 330, 520, 165], ["Balcony", 640, 118, 90]];
+// hotspot links: target node, optional 'via' marker position (plan px) at the doorway
+const LINKS = {
+  foyer:   [["living", 900, 470], ["dining", 760, 560], ["kitchen", 1000, 600], ["br2", 1052, 420]],
+  living:  [["foyer", 1000, 510], ["dining", 740, 560], ["balcony", 782, 172], ["br3", 602, 472]],
+  dining:  [["living", 790, 430], ["kitchen", 935, 655], ["foyer", 1020, 515], ["master", 372, 525], ["br3", 602, 472]],
+  kitchen: [["dining", 900, 650], ["foyer", 1050, 540]],
+  br2:     [["foyer", 1052, 420], ["balcony", 1185, 168]],
+  br3:     [["dining", 602, 470], ["balcony", 511, 168]],
+  master:  [["dining", 372, 525], ["mbath", 269, 292], ["balcony", 125, 290]],
+  mbath:   [["master", 269, 300]],
+  balcony: [["living", 782, 168], ["br3", 511, 168], ["br2", 1185, 168], ["master", 125, 168]]
+};
+const ORDER = ["foyer", "living", "balcony", "dining", "kitchen", "br3", "br2", "master", "mbath"];
+const EYE = 1.55;
 
-const canvas = document.getElementById("view");
+// ---------------------------------------------------------------- renderer + panorama spheres
+const canvas = document.getElementById("c");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xcfe0ea);
-scene.fog = new THREE.Fog(0xcfe0ea, 30, 90);
-const pmrem = new THREE.PMREMGenerator(renderer);
-const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environment = envTex;
-const camera = new THREE.PerspectiveCamera(72, 1, 0.05, 200);
-
-scene.add(new THREE.HemisphereLight(0xfff3e2, 0x9a8f80, 1.35));
-const sun = new THREE.DirectionalLight(0xfff1dc, 1.6); sun.position.set(-6, 14, -12); scene.add(sun);
-
-let layout, colliders = [], rooms = {};
-const S = 74;
-const px2x = px => (px - 45) / S, py2y = py => -(py - 160) / S;
-const player = { x: 0, y: 0, yaw: Math.PI, pitch: 0, eye: 1.58, r: 0.22 };
-
-function resize() {
-  const w = innerWidth, h = innerHeight;
-  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+const geo = new THREE.SphereGeometry(500, 96, 64); geo.scale(-1, 1, 1);
+function makeSphere() {
+  const m = new THREE.MeshBasicMaterial({ transparent: true, opacity: 1, depthWrite: false });
+  const s = new THREE.Mesh(geo, m); s.rotation.y = Math.PI; scene.add(s); return s;
 }
-addEventListener("resize", resize); resize();
-
-const go = document.getElementById("go");
-Promise.all([
-  fetch("layout.json").then(r => r.json()),
-  new Promise((res, rej) => new GLTFLoader().load("a105.json", res, ev => {
-    if (ev.total) go.textContent = `Loading model… ${Math.round(100 * ev.loaded / ev.total)}%`;
-  }, rej))
-]).then(([lay, gltf]) => {
-  layout = lay; colliders = lay.colliders; rooms = lay.rooms;
-  gltf.scene.traverse(o => {
-    if (o.isMesh) {
-      const m = o.material;
-      if (m) {
-        m.envMapIntensity = /mirror|steel|copper|black_gloss|white_gloss|floor_tile|marble|screen|glass/.test(m.name) ? 1.0 : 0.35;
-        if (/glass|sheer/.test(m.name)) { m.depthWrite = false; m.side = THREE.DoubleSide; }
-        if (/^led/.test(m.name)) { m.emissiveIntensity = 2.5; m.toneMapped = false; }
-      }
-    }
-  });
-  scene.add(gltf.scene);
-  // warm downlights: a handful of real lights, the rest are emissive discs
-  const pick = [0, 1, 4, 5, 6, 8, 10, 12, 15, 17, 18, 21];
-  for (const i of pick) {
-    const [x, y] = lay.lights[i]; const L = new THREE.PointLight(0xffd8a8, 2.4, 6.5, 2);
-    L.position.set(x, lay.ceiling - 0.25, -y); scene.add(L);
-  }
-  teleport(JUMPS[0]);
-  go.disabled = false; go.textContent = "Enter the flat";
-  buildJumps();
-}).catch(err => { go.textContent = "The model didn't load. Reload the page to try again."; console.error(err); });
-
-function teleport([name, px, py, yawDeg]) { player.x = px2x(px); player.y = py2y(py); player.yaw = yawDeg * Math.PI / 180; player.pitch = 0; }
-function buildJumps() {
-  const box = document.getElementById("jump");
-  for (const j of JUMPS) {
-    const b = document.createElement("button"); b.type = "button"; b.textContent = j[0];
-    b.addEventListener("click", e => { e.stopPropagation(); teleport(j); });
-    box.appendChild(b);
-  }
+const sA = makeSphere(), sB = makeSphere(); sB.material.opacity = 0; sB.renderOrder = 1;
+const loader = new THREE.TextureLoader();
+const cache = {};
+function tex(url) {
+  if (cache[url]) return cache[url];
+  cache[url] = new Promise((res, rej) => loader.load(url, t => {
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    t.minFilter = THREE.LinearMipmapLinearFilter; res(t);
+  }, undefined, rej));
+  return cache[url];
 }
+const small = id => `pano/${id}_s.jpg`, big = id => `pano/${id}.jpg`;
 
-// ---------------------------------------------------------------- input
-const keys = new Set();
-addEventListener("keydown", e => { keys.add(e.code); if (e.code.startsWith("Arrow")) e.preventDefault(); });
-addEventListener("keyup", e => keys.delete(e.code));
-let locked = false;
-const start = document.getElementById("start");
-go.addEventListener("click", () => {
-  start.hidden = true;
-  if (!isTouch) { try { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 85 : 72; camera.updateProjectionMatrix(); fovBase = camera.fov; }
+let fovBase = 72; addEventListener("resize", resize); resize();
+
+// ---------------------------------------------------------------- look controls (yaw in plan degrees: 0 = east, 90 = north)
+let yaw = 180, pitch = -4, vy = 0, vp = 0, drag = null, lastInput = performance.now(), zoom = 1;
+function dirFromYaw(yd, pd) {
+  const y = THREE.MathUtils.degToRad(yd), p = THREE.MathUtils.degToRad(pd);
+  return new THREE.Vector3(Math.cos(y) * Math.cos(p), Math.sin(p), -Math.sin(y) * Math.cos(p));
+}
+canvas.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, t: performance.now() }; canvas.setPointerCapture(e.pointerId); stopAuto(); hideHint(); });
+canvas.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const k = camera.fov / innerHeight;
+  const dx = (e.clientX - drag.x) * k, dy = (e.clientY - drag.y) * k;
+  yaw += dx; pitch = Math.max(-80, Math.min(80, pitch + dy));
+  vy = dx; vp = dy; drag.x = e.clientX; drag.y = e.clientY; lastInput = performance.now();
 });
-canvas.addEventListener("click", () => { if (!isTouch && !locked) { try { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {} } });
-document.addEventListener("pointerlockchange", () => { locked = document.pointerLockElement === canvas; });
-let dragLook = null;
-addEventListener("mousemove", e => {
-  if (locked) look(e.movementX, e.movementY);
-  else if (dragLook && !isTouch) { look(e.clientX - dragLook.x, e.clientY - dragLook.y); dragLook = { x: e.clientX, y: e.clientY }; }
+addEventListener("pointerup", () => { drag = null; });
+canvas.addEventListener("wheel", e => { e.preventDefault(); zoom = Math.max(0.55, Math.min(1.25, zoom * (1 + e.deltaY * 0.001))); lastInput = performance.now(); }, { passive: false });
+let pinch = null;
+canvas.addEventListener("touchstart", e => { if (e.touches.length === 2) pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY) / zoom; }, { passive: true });
+canvas.addEventListener("touchmove", e => { if (pinch && e.touches.length === 2) { const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); zoom = Math.max(0.55, Math.min(1.25, pinch / d)); } }, { passive: true });
+canvas.addEventListener("touchend", () => { pinch = null; });
+addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") yaw += 6; if (e.key === "ArrowRight") yaw -= 6;
+  if (e.key === "ArrowUp") pitch = Math.min(80, pitch + 5); if (e.key === "ArrowDown") pitch = Math.max(-80, pitch - 5);
+  lastInput = performance.now();
 });
-canvas.addEventListener("mousedown", e => { if (!locked) dragLook = { x: e.clientX, y: e.clientY }; });
-addEventListener("mouseup", () => dragLook = null);
-function look(dx, dy) {
-  player.yaw -= dx * 0.0024; player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch - dy * 0.0024));
-}
-// touch: left half = joystick, right half = look
-const isTouch = matchMedia("(pointer: coarse)").matches;
-const stick = document.getElementById("stick"), knob = document.getElementById("knob");
-let moveTouch = null, lookTouch = null, joy = { x: 0, y: 0 };
-canvas.addEventListener("touchstart", e => {
-  for (const t of e.changedTouches) {
-    if (t.clientX < innerWidth / 2 && !moveTouch) {
-      moveTouch = { id: t.identifier, x: t.clientX, y: t.clientY };
-      stick.style.display = "block"; stick.style.left = (t.clientX - 55) + "px"; stick.style.top = (t.clientY - 55) + "px";
-    } else if (!lookTouch) lookTouch = { id: t.identifier, x: t.clientX, y: t.clientY };
-  }
-}, { passive: true });
-canvas.addEventListener("touchmove", e => {
-  for (const t of e.changedTouches) {
-    if (moveTouch && t.identifier === moveTouch.id) {
-      let dx = t.clientX - moveTouch.x, dy = t.clientY - moveTouch.y; const d = Math.hypot(dx, dy), m = 45;
-      if (d > m) { dx *= m / d; dy *= m / d; }
-      joy = { x: dx / m, y: dy / m }; knob.style.left = (35 + dx) + "px"; knob.style.top = (35 + dy) + "px";
-    } else if (lookTouch && t.identifier === lookTouch.id) {
-      look((t.clientX - lookTouch.x) * 1.6, (t.clientY - lookTouch.y) * 1.6); lookTouch.x = t.clientX; lookTouch.y = t.clientY;
-    }
-  }
-}, { passive: true });
-function endTouch(e) {
-  for (const t of e.changedTouches) {
-    if (moveTouch && t.identifier === moveTouch.id) { moveTouch = null; joy = { x: 0, y: 0 }; stick.style.display = "none"; knob.style.left = knob.style.top = "35px"; }
-    if (lookTouch && t.identifier === lookTouch.id) lookTouch = null;
-  }
-}
-canvas.addEventListener("touchend", endTouch); canvas.addEventListener("touchcancel", endTouch);
-if (isTouch) document.getElementById("keys").textContent = "Drag the left half of the screen to walk and the right half to look around.";
 
-// ---------------------------------------------------------------- collision (circle vs plan rectangles, metres)
-function blocked(x, y) {
-  const r = player.r;
-  for (const c of colliders) {
-    const x0 = Math.min(c[0], c[2]), x1 = Math.max(c[0], c[2]), y0 = Math.min(c[1], c[3]), y1 = Math.max(c[1], c[3]);
-    const cx = Math.max(x0, Math.min(x, x1)), cy = Math.max(y0, Math.min(y, y1));
-    if ((x - cx) ** 2 + (y - cy) ** 2 < r * r) return true;
+// ---------------------------------------------------------------- navigation
+let current = null, busy = false;
+const hsBox = document.getElementById("hotspots");
+let hotspots = [];
+function buildHotspots(id) {
+  hsBox.innerHTML = ""; hotspots = [];
+  const n = NODES[id];
+  for (const [to, vx, vyy] of LINKS[id]) {
+    const dx = X(vx) - X(n.px), dy = Y(vyy) - Y(n.py);
+    const dist = Math.max(0.6, Math.hypot(dx, dy));
+    const v = new THREE.Vector3(dx, -EYE + 0.05, -dy).normalize().multiplyScalar(10);
+    const el = document.createElement("button"); el.className = "hs"; el.type = "button";
+    el.setAttribute("aria-label", `Go to ${NODES[to].name}`);
+    el.innerHTML = `<span class="ring"></span><span class="tag">${NODES[to].name}</span>`;
+    el.addEventListener("click", ev => { ev.stopPropagation(); stopAuto(); go(to, Math.atan2(dy, dx) * 180 / Math.PI); });
+    hsBox.appendChild(el); hotspots.push({ el, v, dist });
   }
-  return false;
 }
-function roomAt(x, y) {
-  for (const [name, c] of Object.entries(rooms)) {
-    const x0 = Math.min(c[0], c[2]), x1 = Math.max(c[0], c[2]), y0 = Math.min(c[1], c[3]), y1 = Math.max(c[1], c[3]);
-    if (x >= x0 && x <= x1 && y >= y0 && y <= y1) return name;
+const veil = document.getElementById("veil"), load = document.getElementById("load");
+async function go(id, faceYaw) {
+  if (busy || id === current) return; busy = true;
+  const n = NODES[id];
+  // turn toward the destination while zooming in a little
+  if (faceYaw !== undefined && current) {
+    const start = yaw, startZ = zoom, t0 = performance.now();
+    let d = ((faceYaw - start) % 360 + 540) % 360 - 180;
+    await new Promise(res => { (function step() { const t = Math.min(1, (performance.now() - t0) / 520); const e = t * t * (3 - 2 * t);
+      yaw = start + d * e; pitch = pitch * (1 - e) + -6 * e; zoom = startZ * (1 - e) + 0.72 * e; if (t < 1) requestAnimationFrame(step); else res(); })(); });
   }
-  return null;
+  load.hidden = false;
+  let t;
+  try { t = await tex(small(id)); } catch (e) { load.hidden = true; busy = false; return; }
+  sB.material.map = t; sB.material.needsUpdate = true;
+  const t0 = performance.now();
+  await new Promise(res => { (function step() { const k = Math.min(1, (performance.now() - t0) / 650); sB.material.opacity = k;
+    zoom = zoom + (1 - zoom) * 0.12; if (k < 1) requestAnimationFrame(step); else res(); })(); });
+  sA.material.map = t; sA.material.needsUpdate = true; sB.material.opacity = 0;
+  zoom = 1;
+  if (faceYaw === undefined || !current) { yaw = n.yaw; pitch = -4; }
+  current = id; busy = false; buildHotspots(id); updateUI();
+  tex(big(id)).then(tb => { if (current === id) { sA.material.map = tb; sA.material.needsUpdate = true; } load.hidden = true; }).catch(() => { load.hidden = true; });
+  // warm the cache for neighbours
+  for (const [to] of LINKS[id]) tex(small(to)).catch(() => {});
 }
+
+// ---------------------------------------------------------------- UI
+const cName = document.getElementById("cName"), cSize = document.getElementById("cSize"), cText = document.getElementById("cText");
+const rooms = document.getElementById("rooms"), planWrap = document.getElementById("planWrap"), cone = document.getElementById("cone");
+for (const id of ORDER) {
+  const b = document.createElement("button"); b.className = "chip"; b.type = "button"; b.textContent = NODES[id].name; b.dataset.id = id;
+  b.addEventListener("click", () => { stopAuto(); go(id); }); rooms.appendChild(b);
+  const p = document.createElement("button"); p.className = "pin"; p.type = "button"; p.dataset.id = id; p.setAttribute("aria-label", NODES[id].name); p.title = NODES[id].name;
+  p.style.left = ((NODES[id].px - 30) / 1400 * 100) + "%"; p.style.top = ((NODES[id].py - 60) / 810 * 100) + "%";
+  p.addEventListener("click", () => { stopAuto(); go(id); }); planWrap.appendChild(p);
+}
+function updateUI() {
+  const n = NODES[current];
+  cName.textContent = n.name; cSize.textContent = n.size; cText.textContent = n.text;
+  rooms.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-current", c.dataset.id === current));
+  planWrap.querySelectorAll(".pin").forEach(c => c.setAttribute("aria-current", c.dataset.id === current));
+  cone.style.left = ((n.px - 30) / 1400 * 100) + "%"; cone.style.top = ((n.py - 60) / 810 * 100) + "%";
+  const chip = rooms.querySelector(`[data-id="${current}"]`); if (chip) chip.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
+}
+const plan = document.getElementById("plan"), bPlan = document.getElementById("bPlan");
+bPlan.addEventListener("click", () => { plan.hidden = !plan.hidden; bPlan.setAttribute("aria-pressed", !plan.hidden); });
+if (innerWidth < 1100) { plan.hidden = true; bPlan.setAttribute("aria-pressed", "false"); }
+const credits = document.getElementById("credits"), bInfo = document.getElementById("bInfo");
+bInfo.addEventListener("click", () => { credits.hidden = !credits.hidden; bInfo.setAttribute("aria-pressed", !credits.hidden); });
+document.getElementById("bFull").addEventListener("click", () => {
+  try { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); } catch (e) {}
+});
+// guided tour: slow pan in each room, then move on
+const bAuto = document.getElementById("bAuto"); let auto = null;
+function stopAuto() { if (auto) { clearTimeout(auto); auto = null; bAuto.setAttribute("aria-pressed", "false"); } }
+function autoStep() { const i = (ORDER.indexOf(current) + 1) % ORDER.length; go(ORDER[i]); auto = setTimeout(autoStep, 11000); }
+bAuto.addEventListener("click", () => { if (auto) stopAuto(); else { bAuto.setAttribute("aria-pressed", "true"); auto = setTimeout(autoStep, 9000); lastInput = 0; } });
+// phone motion (where the browser allows it)
+const bGyro = document.getElementById("bGyro"); let gyro = false, g0 = null;
+if (window.DeviceOrientationEvent && matchMedia("(pointer: coarse)").matches) bGyro.hidden = false;
+bGyro.addEventListener("click", async () => {
+  try { if (typeof DeviceOrientationEvent.requestPermission === "function") { const r = await DeviceOrientationEvent.requestPermission(); if (r !== "granted") return; } } catch (e) { return; }
+  gyro = !gyro; g0 = null; bGyro.setAttribute("aria-pressed", gyro);
+});
+addEventListener("deviceorientation", e => {
+  if (!gyro || e.alpha == null) return;
+  if (!g0) g0 = { a: e.alpha, y: yaw };
+  yaw = g0.y + (e.alpha - g0.a); pitch = Math.max(-80, Math.min(80, (e.beta || 90) - 90)); lastInput = performance.now();
+});
+const hint = document.getElementById("hint"); let hintTimer;
+function hideHint() { hint.style.opacity = 0; clearTimeout(hintTimer); hintTimer = setTimeout(() => hint.hidden = true, 900); }
+
+// ---------------------------------------------------------------- intro
+const slides = [...document.querySelectorAll(".slide")]; let si = 0;
+const slideTimer = setInterval(() => { slides[si].classList.remove("on"); si = (si + 1) % slides.length; slides[si].classList.add("on"); }, 5200);
+tex(small("foyer")).catch(() => {});
+document.getElementById("go").addEventListener("click", async () => {
+  await go("foyer");
+  document.getElementById("intro").classList.add("gone"); clearInterval(slideTimer);
+  for (const id of ["top", "caption", "rooms", "hint"]) document.getElementById(id).hidden = false;
+  if (innerWidth >= 1100) plan.hidden = false;
+  hintTimer = setTimeout(hideHint, 5000);
+  setTimeout(() => document.getElementById("intro").hidden = true, 1000);
+});
+if (location.hash && NODES[location.hash.slice(1)]) document.getElementById("go").click();
 
 // ---------------------------------------------------------------- loop
-const roomEl = document.querySelector("#room .name"), sizeEl = document.querySelector("#room .size");
-const dot = document.getElementById("dot"), cone = document.getElementById("cone"), mapEl = document.getElementById("map");
-let last = performance.now(), lastRoom = "", bob = 0;
-function tick(now) {
-  const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  if (layout) {
-    let f = 0, s = 0;
-    if (keys.has("KeyW") || keys.has("ArrowUp")) f += 1;
-    if (keys.has("KeyS") || keys.has("ArrowDown")) f -= 1;
-    if (keys.has("KeyA")) s -= 1;
-    if (keys.has("KeyD")) s += 1;
-    if (keys.has("ArrowLeft")) player.yaw += 1.8 * dt;
-    if (keys.has("ArrowRight")) player.yaw -= 1.8 * dt;
-    f -= joy.y; s += joy.x;
-    const len = Math.hypot(f, s);
-    if (len > 0) {
-      const speed = (keys.has("ShiftLeft") || keys.has("ShiftRight") ? 2.6 : 1.4) * Math.min(1, len) / Math.max(len, 1);
-      const cy = Math.cos(player.yaw), sy = Math.sin(player.yaw);
-      // forward = (cos yaw, sin yaw); right = (sin yaw, -cos yaw) in plan coordinates (Y north)
-      const dx = (f * cy + s * sy) * speed * dt, dy = (f * sy - s * cy) * speed * dt;
-      if (!blocked(player.x + dx, player.y)) player.x += dx;
-      if (!blocked(player.x, player.y + dy)) player.y += dy;
-      bob += dt * speed * 6;
-    }
-    const eye = player.eye + Math.sin(bob) * 0.012;
-    camera.position.set(player.x, eye, -player.y);
-    const cp = Math.cos(player.pitch);
-    camera.lookAt(player.x + Math.cos(player.yaw) * cp, eye + Math.sin(player.pitch), -(player.y + Math.sin(player.yaw) * cp));
-    const room = roomAt(player.x, player.y) || lastRoom || "Entrance";
-    if (room !== lastRoom) { roomEl.textContent = room; sizeEl.textContent = SIZES[room] || ""; lastRoom = room; }
-    // minimap: render covers plan px 30..1430 x 60..870
-    const px = player.x * S + 45, py = -player.y * S + 160;
-    const W = mapEl.clientWidth, H = mapEl.clientHeight;
-    const mx = (px - 30) / 1400 * W, my = (py - 60) / 810 * H;
-    dot.style.left = mx + "px"; dot.style.top = my + "px";
-    cone.style.left = mx + "px"; cone.style.top = my + "px";
-    cone.style.transform = `rotate(${90 - player.yaw * 180 / Math.PI}deg)`;
+const tmp = new THREE.Vector3();
+function frame(now) {
+  if (!drag) { yaw += vy; pitch = Math.max(-80, Math.min(80, pitch + vp)); vy *= 0.92; vp *= 0.92; }
+  if (current && !drag && !gyro && now - lastInput > 6000) yaw += 0.025;
+  camera.fov = fovBase * zoom; camera.updateProjectionMatrix();
+  camera.lookAt(dirFromYaw(yaw, pitch));
+  // hotspots
+  for (const h of hotspots) {
+    tmp.copy(h.v).project(camera);
+    const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.2 && Math.abs(tmp.y) < 1.2;
+    h.el.style.display = vis ? "grid" : "none";
+    if (vis) { h.el.style.left = ((tmp.x + 1) / 2 * innerWidth) + "px"; h.el.style.top = ((1 - tmp.y) / 2 * innerHeight) + "px"; }
   }
+  cone.style.transform = `rotate(${90 - yaw}deg)`;
   renderer.render(scene, camera);
-  requestAnimationFrame(tick);
+  requestAnimationFrame(frame);
 }
-requestAnimationFrame(tick);
+requestAnimationFrame(frame);
 </script>
-
 </body>
 </html>
