@@ -34,16 +34,16 @@ button { font: inherit; color: inherit; }
 .slide { position: absolute; inset: -4%; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.8s ease; animation: drift 18s ease-in-out infinite alternate; }
 .slide.on { opacity: 1; }
 @keyframes drift { from { transform: scale(1.0) translate3d(0,0,0); } to { transform: scale(1.08) translate3d(-1.5%, -1%, 0); } }
-#intro::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,12,10,.15) 0%, rgba(14,12,10,.1) 40%, rgba(14,12,10,.88) 100%); }
+#intro::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,12,10,.35) 0%, rgba(14,12,10,.2) 30%, rgba(14,12,10,.72) 62%, rgba(14,12,10,.94) 100%); }
 .intro-body { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0;
   padding: 0 max(24px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
   display: grid; gap: 18px; max-width: 980px; }
-.eyebrow { font: 600 .72rem var(--sans); letter-spacing: .32em; text-transform: uppercase; color: var(--gold); }
-h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(3.2rem, 10vw, 7.4rem); line-height: .9; letter-spacing: -.01em; text-wrap: balance; }
+.eyebrow { font: 600 .7rem var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--gold); text-shadow: 0 1px 10px rgba(0,0,0,.6); }
+h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(2.9rem, 10.5vw, 6.6rem); line-height: .95; letter-spacing: -.01em; text-wrap: balance; text-shadow: 0 2px 24px rgba(0,0,0,.45); }
 h1 em { font-style: italic; color: var(--gold); }
-.lede { max-width: 52ch; color: var(--ink-dim); font-size: 1.02rem; line-height: 1.65; margin: 0; }
-.facts { display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: .82rem; color: var(--ink-dim); }
-.facts b { display: block; font-family: var(--serif); font-weight: 600; font-size: 1.6rem; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+.lede { max-width: 40ch; color: var(--ink); opacity: .9; font-size: 1.05rem; line-height: 1.5; margin: 0; text-shadow: 0 1px 12px rgba(0,0,0,.5); }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 0; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim); }
+.facts span + span::before { content: "·"; margin: 0 10px; color: var(--gold); }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
 .btn { border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border-radius: 999px; padding: 13px 22px; font-weight: 600; font-size: .9rem; letter-spacing: .02em; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; color: var(--ink); }
@@ -159,20 +159,15 @@ h1 em { font-style: italic; color: var(--gold); }
   <div class="slide" style="background-image:url(img/hero_kitchen.jpg?v=4)"></div>
   <div class="slide" style="background-image:url(img/hero_balcony.jpg?v=4)"></div>
   <div class="intro-body">
-    <div class="eyebrow">Vanshika's Nature's Harmony · Bengaluru</div>
-    <h1>Residence <em>A&#8209;105</em></h1>
-    <p class="lede">Step inside a three-bedroom home with a family lounge, open to a balcony that runs the full length of the façade. Walk from the front door to every room in a photoreal 360° tour.</p>
-    <div class="facts">
-      <div><b>2,011</b>sq ft saleable</div>
-      <div><b>3 + 1</b>bedrooms + family</div>
-      <div><b>3</b>bathrooms</div>
-      <div><b>1</b>continuous balcony</div>
-    </div>
+    <div class="eyebrow">Residence A&#8209;105 · Nature's Harmony</div>
+    <h1>Step inside your <em>future&nbsp;home.</em></h1>
+    <p class="lede">From the front door to a balcony facing the forest.</p>
+    <div class="facts"><span>2,011 sq ft</span><span>3 BHK + family</span><span>3 baths</span></div>
     <div class="cta">
-      <button class="btn primary" id="go" type="button">Begin the 360° tour</button>
-      <a class="btn" href="walk.html">Walk through freely</a>
+      <button class="btn primary" id="go" type="button">Enter the experience</button>
+      <a class="btn" href="walk.html">Walk freely</a>
     </div>
-    <div class="note">Design visualisation. Furnishing and finishes are illustrative.</div>
+    <div class="note">Illustrative design visualisation.</div>
   </div>
 </section>
 
