@@ -195,8 +195,12 @@ const NODES = {
              text: "A charcoal channel-tufted headboard wall with an ivory gallery panel above, a bouclé bench and linen drapes that soften the light from the balcony." },
   master:  { px: 300, py: 470, name: "Master Bedroom", size: "13.45 x 11.48 ft", yaw: 170,
              text: "Herringbone oak underfoot and a full-height velvet channel headboard. Bronze-glass wardrobes glow from within, and a cognac velvet reading chair sits by the private balcony." },
-  mbath:   { px: 282, py: 258, name: "Master Bath", size: "7.87 x 4.92 ft", yaw: 105,
+  mbath:   { px: 255, py: 240, name: "Master Bath", size: "7.87 x 4.92 ft", yaw: 105,
              text: "A Nero Marquina feature wall, a wall-hung WC, a floating walnut vanity with a vessel basin, and a walk-in rain shower behind clear glass." },
+  bath2:   { px: 1010, py: 300, name: "Bathroom 2", size: "4.92 x 8.86 ft", yaw: 150,
+             text: "Attached to Bedroom 2: a walk-in rain shower behind clear glass, a wall-hung WC and a floating walnut vanity with a vessel basin." },
+  bath3:   { px: 395, py: 640, name: "Bathroom 3", size: "4.92 x 7.87 ft", yaw: 215,
+             text: "The common bathroom off the hall: a vessel basin on a walnut vanity, a wall-hung WC and a rain shower behind glass." },
   balcony: { px: 690, py: 110, name: "Balcony", size: "Full-length façade balcony", yaw: 0,
              text: "One balcony runs the full length of the façade, connecting the master suite, Bedroom 3, the living room and Bedroom 2. A sit-out with morning coffee looks across the compound to the Turahalli forest." }
 };
@@ -206,15 +210,17 @@ const LINKS = {
   entrance: [["foyer", 1150, 516, 0.48]],
   foyer:   [["entrance", 1150, 516], ["living", 900, 470], ["dining", 760, 560], ["kitchen", 1000, 600], ["br2", 1052, 420]],
   living:  [["foyer", 1000, 510], ["dining", 740, 560], ["balcony", 782, 172], ["br3", 602, 472]],
-  dining:  [["living", 790, 430], ["kitchen", 935, 655], ["foyer", 1020, 515], ["master", 372, 525], ["br3", 602, 472]],
+  dining:  [["living", 790, 430], ["kitchen", 935, 655], ["foyer", 1020, 515], ["master", 372, 525], ["br3", 602, 472], ["bath3", 408, 560]],
   kitchen: [["dining", 900, 650], ["foyer", 1050, 540]],
-  br2:     [["foyer", 1052, 420], ["balcony", 1185, 168]],
+  br2:     [["foyer", 1052, 420], ["balcony", 1185, 168], ["bath2", 1052, 347]],
   br3:     [["dining", 602, 470], ["balcony", 511, 168]],
   master:  [["dining", 372, 525], ["mbath", 269, 292], ["balcony", 125, 290]],
   mbath:   [["master", 269, 300]],
+  bath2:   [["br2", 1052, 347]],
+  bath3:   [["dining", 408, 560]],
   balcony: [["living", 782, 168], ["br3", 511, 168], ["br2", 1185, 168], ["master", 125, 168]]
 };
-const ORDER = ["entrance", "foyer", "living", "balcony", "dining", "kitchen", "br3", "br2", "master", "mbath"];
+const ORDER = ["entrance", "foyer", "living", "balcony", "dining", "kitchen", "bath3", "br3", "br2", "bath2", "master", "mbath"];
 const EYE = 1.55;
 
 // ---------------------------------------------------------------- renderer + panorama spheres
@@ -240,7 +246,7 @@ function tex(url) {
   }, undefined, rej));
   return cache[url];
 }
-const V = "?v=5";
+const V = "?v=6";
 const small = id => `pano/${id}_s.jpg${V}`, big = id => `pano/${id}.jpg${V}`;
 
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 85 : 72; camera.updateProjectionMatrix(); fovBase = camera.fov; }
@@ -368,7 +374,8 @@ const slides = [...document.querySelectorAll(".slide")]; let si = 0;
 const slideTimer = setInterval(() => { slides[si].classList.remove("on"); si = (si + 1) % slides.length; slides[si].classList.add("on"); }, 5200);
 tex(small("entrance")).catch(() => {});
 document.getElementById("go").addEventListener("click", async () => {
-  await go("entrance");
+  const startAt = NODES[location.hash.slice(1)] ? location.hash.slice(1) : "entrance";   // index.html#br2 opens Bedroom 2
+  await go(startAt);
   document.getElementById("intro").classList.add("gone"); clearInterval(slideTimer);
   for (const id of ["top", "caption", "rooms", "hint"]) document.getElementById(id).hidden = false;
   if (innerWidth >= 1100) plan.hidden = false;

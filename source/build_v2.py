@@ -143,7 +143,7 @@ def fill(name, o, horiz, px0, py0, px1, py1):
             fb(f"{name}_al{sg}", lo - aw, lo, 0, top + aw, trim, d0, d1)
             fb(f"{name}_ar{sg}", hi, hi + aw, 0, top + aw, trim, d0, d1)
             fb(f"{name}_ah{sg}", lo - aw, hi + aw, top, top + aw, trim, d0, d1)
-        # leaf open at 90 degrees, clear of the wall face
+        # leaf: open at 90 degrees clear of the wall face, or ajar (open=<deg>) so its face and handle read
         width = hi - lo - 0.05
         hinge_lo = (o.get("hinge", "a") == "a") == (A <= B)
         hinge = lo + 0.025 if hinge_lo else hi - 0.025
@@ -153,24 +153,40 @@ def fill(name, o, horiz, px0, py0, px1, py1):
             out = Vector((0, -side, 0)); hp = Vector((hinge, c, 0)); al = Vector((along, 0, 0))
         else:
             out = Vector((side, 0, 0)); hp = Vector((c, hinge, 0)); al = Vector((0, along, 0))
-        face = hp + out * (th / 2 + 0.012)
         lt = 0.045
-        cen = face + out * (width / 2) + al * (lt / 2 + 0.005)
-        ang = math.degrees(math.atan2(out.y, out.x)) - 90
+        th_open = math.radians(o.get("open", 90))
+        dirv = al * math.cos(th_open) + out * math.sin(th_open)          # from the hinge across the leaf
+        nrm = out * math.cos(th_open) - al * math.sin(th_open)           # leaf normal, swing side
+        if o.get("open", 90) >= 89:
+            pivot = hp + out * (th / 2 + 0.012) + al * (lt + 0.005)
+        else:
+            pivot = hp + out * (th / 2)
+        cen = pivot + dirv * (width / 2) - nrm * (lt / 2)
+        ang = math.degrees(math.atan2(dirv.y, dirv.x)) - 90
         boxc(f"{name}_leaf", cen.x, cen.y, 0.008, lt, width, top - 0.02, leafm, "Openings", rot=ang)
         # vertical grooves (proud, so they never coincide with the leaf faces)
         for g in (-0.18, 0.18):
-            p = cen + out * g
+            p = cen + dirv * g
             for sgn in (-1, 1):
-                q = p + al * sgn * (lt / 2 + 0.0015)
+                q = p + nrm * sgn * (lt / 2 + 0.0015)
                 boxc(f"{name}_gr{g}{sgn}", q.x, q.y, 0.15, 0.003, 0.006, top - 0.35, "lacquer_black", "Openings", rot=ang)
-        # brass lever handles on both faces
-        hpnt = face + out * (width - 0.08)
+        # brass lever sets on both faces: round rose, neck and a lever that points back toward the hinge
+        hc = cen + dirv * (width / 2 - 0.07)
         for sgn in (-1, 1):
-            q = hpnt + al * (lt / 2 + 0.005 + 0.03) * sgn + al * (lt / 2 + 0.005) * 0
-            q = (face + out * (width - 0.08)) + al * ((lt / 2 + 0.005) + sgn * (lt / 2 + 0.03))
-            boxc(f"{name}_hd{sgn}", q.x, q.y, 1.02, 0.02, 0.14, 0.02, "brass", "Openings", rot=ang, bevel=0.008)
-            boxc(f"{name}_ro{sgn}", q.x, q.y, 0.99, 0.02, 0.05, 0.08, "brass", "Openings", rot=ang, bevel=0.008)
+            f0 = hc + nrm * sgn * (lt / 2)
+            r_ = f0
+            cyl(f"{name}_rose{sgn}", r_.x, r_.y, 1.02, 0.032, 0.01, "brass", "Openings", 32,
+                rot=(90, 0, math.degrees(math.atan2(nrm.y, nrm.x)) + 90 + (180 if sgn < 0 else 0)))
+            nk = f0 + nrm * sgn * 0.03
+            boxc(f"{name}_neck{sgn}", nk.x, nk.y, 1.005, 0.05, 0.018, 0.03, "brass", "Openings", rot=ang, bevel=0.006)
+            lv = f0 + nrm * sgn * 0.052 - dirv * 0.055
+            boxc(f"{name}_lever{sgn}", lv.x, lv.y, 1.006, 0.02, 0.14, 0.024, "brass", "Openings", rot=ang, bevel=0.009)
+            if o.get("privacy"):        # bathroom: privacy turn inside, release slot outside
+                pr = f0 + nrm * sgn * 0.004
+                cyl(f"{name}_prv{sgn}", pr.x, pr.y, 0.86, 0.022, 0.008, "brass", "Openings", 24,
+                    rot=(90, 0, math.degrees(math.atan2(nrm.y, nrm.x)) + 90 + (180 if sgn < 0 else 0)))
+                tk = f0 + nrm * sgn * 0.014
+                boxc(f"{name}_turn{sgn}", tk.x, tk.y, 0.858, 0.012, 0.006 if sgn < 0 else 0.03, 0.03 if sgn < 0 else 0.006, "brass", "Openings", rot=ang, bevel=0.002)
 
 def D(a, b, hinge="a", swing=1, **kw):
     d = dict(a=a, b=b, bot=0, top=DOOR_H, kind="door", hinge=hinge, swing=swing); d.update(kw); return d
@@ -179,11 +195,11 @@ def SL(a, b): return dict(a=a, b=b, bot=0, top=SLIDE_H, kind="slider")
 
 wall("MasterWest", 45, 160, 55, 752, [W(290, 368, 0.6, 2.4)])
 wall("BalconyT1", 180, 160, 192, 292)
-wall("MasterNorth", 55, 288, 365, 297, [SL(70, 180), D(238, 300, hinge="a", swing=-1)])
+wall("MasterNorth", 55, 288, 365, 297, [SL(70, 180), D(238, 300, hinge="a", swing=-1, open=40, privacy=True)])
 wall("T1North", 180, 160, 438, 172, [W(195, 240, 1.6, 2.3)])
 wall("MasterEast", 365, 172, 378, 557, [D(492, 557, hinge="b", swing=-1)])
 wall("MasterSouth", 45, 597, 313, 605)
-wall("T3North", 313, 557, 450, 564, [D(378, 437, hinge="b", swing=1)])
+wall("T3North", 313, 557, 450, 564, [D(378, 437, hinge="b", swing=1, open=40, privacy=True)])
 wall("T3West", 313, 564, 325, 745, [W(687, 740, 1.6, 2.3)], skirting=False)
 wall("T3East", 437, 564, 450, 752)
 wall("BR3South", 378, 462, 635, 470, [D(572, 632, hinge="b", swing=-1)])
@@ -192,7 +208,7 @@ wall("BR3Living", 635, 172, 649, 470)
 wall("T2West", 922, 172, 935, 385)
 wall("T2South", 935, 378, 1047, 385)
 wall("T2North", 935, 160, 1047, 172, [W(960, 1010, 1.7, 2.3)])
-wall("BR2West", 1047, 160, 1057, 452, [D(318, 376, hinge="a", swing=-1), D(390, 450, hinge="b", swing=1)])
+wall("BR2West", 1047, 160, 1057, 452, [D(318, 376, hinge="a", swing=-1, open=40, privacy=True), D(390, 450, hinge="b", swing=1)])
 wall("BR2North", 1057, 160, 1325, 172, [SL(1117, 1253)])
 wall("BR2East", 1313, 172, 1325, 452)
 wall("BR2South", 1047, 452, 1560, 462)
@@ -618,18 +634,35 @@ for (px, py) in [(110, 350), (110, 520), (300, 350), (300, 520), (210, 560)]:
     spot(px, py)
 
 # ============================================================== BATHROOMS
-def bathroom(n, px0, py0, px1, py1, wc_side, van_side, accent="marble_nero"):
+def bathroom(n, px0, py0, px1, py1, wc_side, van_side, accent="marble_nero", holes=None):
+    """1 cm stone / marble finish on the four walls, cut around the door and window openings.
+    holes: {"N"|"S"|"E"|"W": [(px_a, px_b, bottom, top), ...]} in plan px along that wall."""
     x0, x1, y_n, y_s = X(px0), X(px1), Y(py0), Y(py1)
-    t = 0.01
-    box(n + "_wN", x0, y_n - t, 0, x1, y_n, H - 0.02, accent, "Decor")
-    box(n + "_wS", x0, y_s, 0, x1, y_s + t, H - 0.02, "stone_light", "Decor")
-    box(n + "_wW", x0, y_s, 0, x0 + t, y_n, H - 0.02, "stone_light", "Decor")
-    box(n + "_wE", x1 - t, y_s, 0, x1, y_n, H - 0.02, "stone_light", "Decor")
+    t = 0.01; holes = holes or {}
+    def run(side, m):
+        horiz = side in ("N", "S")
+        a0, a1 = (px0, px1) if horiz else (py0, py1)
+        def piece(k, a, b, z0, z1):
+            if b - a < 0.5 or z1 - z0 < 0.005: return
+            if horiz:
+                yy = (y_n - t, y_n) if side == "N" else (y_s, y_s + t)
+                box(f"{n}_w{side}{k}", X(a), yy[0], z0, X(b), yy[1], z1, m, "Decor")
+            else:
+                xx = (x0, x0 + t) if side == "W" else (x1 - t, x1)
+                box(f"{n}_w{side}{k}", xx[0], Y(b), z0, xx[1], Y(a), z1, m, "Decor")
+        cur, k = a0, 0
+        for (a, b, bot, top) in sorted(holes.get(side, [])):
+            piece(k, cur, a, 0, H - 0.02); k += 1
+            piece(k, a, b, 0, bot); k += 1
+            piece(k, a, b, top, H - 0.02); k += 1
+            cur = b
+        piece(k, cur, a1, 0, H - 0.02)
+    run("N", accent); run("S", "stone_light"); run("W", "stone_light"); run("E", "stone_light")
     ld = bpy.data.lights.new(n + "_fill", "POINT"); ld.energy = 45; ld.color = (1.0, 0.86, 0.7); ld.shadow_soft_size = 0.2
     lo_ = bpy.data.objects.new(n + "_fill", ld); lo_.location = ((x0 + x1) / 2, (y_n + y_s) / 2, H - 0.4); coll("Lights").objects.link(lo_)
-bathroom("T1", 192, 172, 365, 288, "N", "W")
-bathroom("T2", 935, 172, 1047, 378, "W", "S")
-bathroom("T3", 325, 564, 437, 745, "E", "S")
+bathroom("T1", 192, 172, 365, 288, "N", "W", holes={"N": [(195, 240, 1.6, 2.3)], "S": [(238, 300, 0, DOOR_H)]})
+bathroom("T2", 935, 172, 1047, 378, "W", "S", holes={"N": [(960, 1010, 1.7, 2.3)], "E": [(318, 376, 0, DOOR_H)]})
+bathroom("T3", 325, 564, 437, 745, "E", "S", holes={"N": [(378, 437, 0, DOOR_H)], "W": [(687, 740, 1.6, 2.3)]})
 for (px, py) in [(278, 230), (990, 300), (380, 690), (990, 210), (230, 230), (380, 610)]:
     spot(px, py, H - 0.04, 30)
 

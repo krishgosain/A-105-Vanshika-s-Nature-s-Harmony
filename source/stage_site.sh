@@ -3,7 +3,7 @@
 set -e
 cd /home/claude/house
 F=build2/final
-for n in entrance foyer living dining balcony kitchen br3 br2 master mbath; do
+for n in entrance foyer living dining balcony kitchen br3 br2 master mbath bath2 bath3; do
   if [ -f $F/$n.jpg ]; then
     python3 -c "
 from PIL import Image
