@@ -32,6 +32,7 @@ mat("bronze", (0.30, 0.22, 0.16), rough=0.3, metal=1.0)
 mat("black_metal", (0.025, 0.025, 0.028), rough=0.35, metal=0.6)
 mat("chrome", (0.9, 0.9, 0.9), rough=0.08, metal=1.0)
 mat("glass", (0.92, 0.95, 0.96), rough=0.01, alpha=0.12, ior=1.5)
+mat("glass_rail", (0.92, 0.95, 0.96), rough=0.01, alpha=0.05, ior=1.5)   # balcony balustrade: clearer, so the forest reads through it
 mat("glass_bronze", (0.25, 0.18, 0.12), rough=0.05, alpha=0.55)
 mat("glass_fluted", (0.50, 0.40, 0.28), normal="fluted_n.png", nstr=0.8, tile=0.25, rough=0.2, alpha=0.62)
 mat("mirror", (0.92, 0.92, 0.92), rough=0.02, metal=1.0)
@@ -230,10 +231,10 @@ floor("Slab_BelowS", 1150, 597, 1570, 870, "plaster_ext", -0.1, "Exterior")
 box("Balcony_Soffit", X(55), Y(160), H + 0.15, X(1313), Y(40), H + 0.35, "plaster_ext", "Exterior")
 box("Balcony_SoffitM", X(55), Y(288), H + 0.15, X(180), Y(160), H + 0.35, "plaster_ext", "Exterior")
 for nm, (a, b) in {"RailN": ((55, 37), (1313, 41))}.items():
-    box(nm + "_glass", X(a[0]), Y(b[1]), -0.03, X(b[0]), Y(a[1]), 1.05, "glass", "Exterior", True)
+    box(nm + "_glass", X(a[0]), Y(b[1]), -0.03, X(b[0]), Y(a[1]), 1.05, "glass_rail", "Exterior", True)
     box(nm + "_cap", X(a[0]), Y(b[1]) - 0.01, 1.05, X(b[0]), Y(a[1]) + 0.01, 1.09, "black_metal", "Exterior")
 for nm, xx in {"RailW": 52, "RailE": 1313}.items():
-    box(nm + "_glass", X(xx), Y(160), -0.03, X(xx + 3), Y(40), 1.05, "glass", "Exterior", True)
+    box(nm + "_glass", X(xx), Y(160), -0.03, X(xx + 3), Y(40), 1.05, "glass_rail", "Exterior", True)
     box(nm + "_cap", X(xx) - 0.01, Y(160), 1.05, X(xx + 3) + 0.01, Y(40), 1.09, "black_metal", "Exterior")
 for i in range(0, 14):
     xx = 55 + i * (1313 - 55) / 13
@@ -326,7 +327,7 @@ for k in range(3):
 curtain("Sheer_L", X(694), Y(176), X(868), Y(176), 0.02, 2.62, "sheer", 9, 0.035)
 curtain("Drape_L1", X(680), Y(180), X(712), Y(180), 0.02, 2.62, "drape_sand", 10, 0.05)
 curtain("Drape_L2", X(852), Y(180), X(884), Y(180), 0.02, 2.62, "drape_sand", 10, 0.05)
-for (px, py) in [(700, 230), (850, 230), (700, 410), (850, 410), (776, 200), (776, 440)]:
+for (px, py) in [(700, 230), (850, 230), (700, 410), (850, 410), (776, 200)]:
     spot(px, py)
 
 # ============================================================== DINING & FAMILY
@@ -442,35 +443,36 @@ for (px, py) in [(1235, 522), (1330, 522), (1430, 522), (1520, 522)]:     # entr
 # ============================================================== KITCHEN
 kx0, kx1, ky_n, ky_s = X(935), X(1137), Y(568), Y(745)
 d = 0.62
-box("K_lowN", kx0 + 0.62, ky_n - d, 0.1, kx1, ky_n, 0.87, "lacquer_taupe", "Furniture", True)
+KN1 = kx1 - 0.716            # north run ends at the fridge in the north-east corner
+box("K_lowN", kx0 + 0.62, ky_n - d, 0.1, KN1, ky_n, 0.87, "lacquer_taupe", "Furniture", True)
 box("K_lowE", kx1 - d, ky_s + 0.02, 0.1, kx1, ky_n - d, 0.87, "lacquer_taupe", "Furniture", True)
-box("K_plinthN", kx0 + 0.62, ky_n - d + 0.06, 0, kx1, ky_n, 0.1, "lacquer_black", "Furniture")
+box("K_plinthN", kx0 + 0.62, ky_n - d + 0.06, 0, KN1, ky_n, 0.1, "lacquer_black", "Furniture")
 box("K_plinthE", kx1 - d + 0.06, ky_s + 0.02, 0, kx1, ky_n - d, 0.1, "lacquer_black", "Furniture")
 for i in range(5):                                   # shadow-gap groove lines between fronts
-    xx = kx0 + 0.62 + i * (kx1 - kx0 - 0.62) / 4
+    xx = kx0 + 0.62 + i * (KN1 - kx0 - 0.62) / 4
     box(f"K_gapN{i}", xx - 0.002, ky_n - d - 0.002, 0.1, xx + 0.002, ky_n - d, 0.87, "lacquer_black", "Furniture")
-box("K_grooveN", kx0 + 0.62, ky_n - d - 0.003, 0.80, kx1, ky_n - d, 0.83, "brass_brushed", "Furniture")
+box("K_grooveN", kx0 + 0.62, ky_n - d - 0.003, 0.80, KN1, ky_n - d, 0.83, "brass_brushed", "Furniture")
 box("K_grooveE", kx1 - d - 0.003, ky_s + 0.02, 0.80, kx1 - d, ky_n - d, 0.83, "brass_brushed", "Furniture")
-box("K_topN", kx0 + 0.62, ky_n - d - 0.02, 0.87, kx1, ky_n, 0.91, "marble_counter", "Furniture", bevel=0.004)
+box("K_topN", kx0 + 0.62, ky_n - d - 0.02, 0.87, KN1, ky_n, 0.91, "marble_counter", "Furniture", bevel=0.004)
 box("K_topE", kx1 - d - 0.02, ky_s + 0.02, 0.87, kx1, ky_n - d - 0.02, 0.91, "marble_counter", "Furniture", bevel=0.004)
 box("K_waterfall", kx0 + 0.6, ky_n - d - 0.02, 0.0, kx0 + 0.64, ky_n, 0.91, "marble_counter", "Furniture")
 box("K_splashN", kx0 + 0.62, ky_n - 0.015, 0.91, kx1, ky_n, H - 0.02, "marble_slab", "Decor")
 box("K_splashE", kx1 - 0.015, ky_s + 0.02, 0.91, kx1, ky_n, H - 0.02, "marble_slab", "Decor")
 # fluted bronze-glass wall cabinets: walnut carcass, lit shelves with crockery, brass-framed fronts
-box("K_upcarcass", kx0 + 0.62, ky_n - 0.36, 1.55, kx0 + 0.62 + 4 * 0.46, ky_n - 0.015, 2.35, "walnut", "Furniture")
+box("K_upcarcass", kx0 + 0.62, ky_n - 0.36, 1.55, kx0 + 0.62 + 3 * 0.46, ky_n - 0.015, 2.35, "walnut", "Furniture")
 for z in (1.82, 2.08):
-    box(f"K_upshelf{z}", kx0 + 0.64, ky_n - 0.35, z, kx0 + 0.6 + 4 * 0.46, ky_n - 0.03, z + 0.012, "glass", "Furniture")
-for i in range(8):
+    box(f"K_upshelf{z}", kx0 + 0.64, ky_n - 0.35, z, kx0 + 0.6 + 3 * 0.46, ky_n - 0.03, z + 0.012, "glass", "Furniture")
+for i in range(6):
     cyl(f"K_plate{i}", kx0 + 0.75 + i * 0.22, ky_n - 0.2, 1.57, 0.1, 0.03, "ceramic_white", "Decor", 24)
     cyl(f"K_cup{i}", kx0 + 0.75 + i * 0.22, ky_n - 0.2, 1.832, 0.04, 0.09, "ceramic_black" if i % 2 else "ceramic_white", "Decor", 16)
-for i in range(4):
+for i in range(3):
     x0_ = kx0 + 0.64 + i * 0.46
     box(f"K_up{i}", x0_, ky_n - 0.375, 1.56, x0_ + 0.44, ky_n - 0.362, 2.34, "glass_fluted", "Furniture")
     for (a_, b_) in [(x0_, x0_ + 0.02), (x0_ + 0.42, x0_ + 0.44)]:
         box(f"K_upfr{i}{a_:.2f}", a_, ky_n - 0.38, 1.55, b_, ky_n - 0.36, 2.35, "brass", "Furniture")
     box(f"K_upglow{i}", x0_ + 0.02, ky_n - 0.06, 1.58, x0_ + 0.42, ky_n - 0.05, 2.32, "led_soft", "Furniture")
-box("K_uptop", kx0 + 0.62, ky_n - 0.38, 2.35, kx0 + 0.62 + 4 * 0.46, ky_n - 0.015, 2.38, "walnut", "Furniture")
-box("K_under", kx0 + 0.64, ky_n - 0.36, 1.54, kx0 + 0.62 + 4 * 0.46, ky_n - 0.34, 1.55, "led", "Furniture")
+box("K_uptop", kx0 + 0.62, ky_n - 0.38, 2.35, kx0 + 0.62 + 3 * 0.46, ky_n - 0.015, 2.38, "walnut", "Furniture")
+box("K_under", kx0 + 0.64, ky_n - 0.36, 1.54, kx0 + 0.62 + 3 * 0.46, ky_n - 0.34, 1.55, "led", "Furniture")
 box("K_sink", kx0 + 1.0, ky_n - 0.5, 0.893, kx0 + 1.6, ky_n - 0.13, 0.912, "black_metal", "Furniture")
 cyl("K_tap", kx0 + 1.3, ky_n - 0.07, 0.91, 0.013, 0.36, "brass", "Furniture", 16)
 torus("K_tapneck", kx0 + 1.3, ky_n - 0.15, 1.27, 0.08, 0.012, "brass", "Furniture", rot=(90, 0, 90))
@@ -481,9 +483,9 @@ box("K_tower", kx0 + 0.005, ky_s + 0.02, 0, kx0 + 0.62, ky_s + 0.66, H - 0.03, "
 box("K_oven", kx0 + 0.62, ky_s + 0.08, 0.95, kx0 + 0.625, ky_s + 0.6, 1.55, "screen", "Furniture")
 box("K_micro", kx0 + 0.62, ky_s + 0.08, 1.6, kx0 + 0.625, ky_s + 0.6, 1.98, "screen", "Furniture")
 box("K_ovenbar", kx0 + 0.625, ky_s + 0.12, 1.47, kx0 + 0.64, ky_s + 0.56, 1.49, "brass", "Furniture")
-asset("K_teacup", "DiffuseTransmissionTeacup.glb", kx1 - 0.35, Y(610), 0.91, scale=1.0)
+asset("K_teacup", "DiffuseTransmissionTeacup.glb", kx1 - 0.35, Y(650), 0.91, scale=1.0)
 for i in range(3):
-    cyl(f"K_jar{i}", kx0 + 1.9 + i * 0.13, ky_n - 0.18, 0.91, 0.05, 0.16 + i * 0.04, "glass", "Decor", 20)
+    cyl(f"K_jar{i}", kx0 + 1.65 + i * 0.13, ky_n - 0.18, 0.91, 0.05, 0.16 + i * 0.04, "glass", "Decor", 20)
 for (px, py) in [(1000, 620), (1080, 620), (1000, 700), (1080, 700)]:
     spot(px, py, H - 0.04)
 box("U_washer", X(1080), Y(842) + 0.02, 0, X(1132), Y(800), 0.85, "lacquer_ivory", "Furniture", True)
@@ -623,68 +625,26 @@ def bathroom(n, px0, py0, px1, py1, wc_side, van_side, accent="marble_nero"):
     box(n + "_wS", x0, y_s, 0, x1, y_s + t, H - 0.02, "stone_light", "Decor")
     box(n + "_wW", x0, y_s, 0, x0 + t, y_n, H - 0.02, "stone_light", "Decor")
     box(n + "_wE", x1 - t, y_s, 0, x1, y_n, H - 0.02, "stone_light", "Decor")
-    if wc_side == "N": cx, cy, r = (x0 + x1) / 2 - 0.3, y_n - 0.32, 90
-    elif wc_side == "W": cx, cy, r = x0 + 0.33, (y_n + y_s) / 2 + 0.3, 0
-    else: cx, cy, r = x1 - 0.33, (y_n + y_s) / 2 + 0.2, 0
-    boxc(n + "_wc", cx, cy, 0.24, 0.55, 0.37, 0.18, "porcelain", rot=r, bevel=0.08, seg=5)
-    boxc(n + "_wcseat", cx, cy, 0.42, 0.5, 0.36, 0.02, "porcelain", rot=r, bevel=0.01)
-    if van_side == "S": vx, vy, vr = (x0 + x1) / 2 + 0.25, y_s + 0.26, 0
-    elif van_side == "W": vx, vy, vr = x0 + 0.26, y_n - 0.5, 90
-    else: vx, vy, vr = x1 - 0.26, y_s + 0.5, 90
-    boxc(n + "_vanity", vx, vy, 0.42, 0.9, 0.5, 0.42, "walnut", rot=vr, collide=True, bevel=0.01)
-    boxc(n + "_vtop", vx, vy, 0.84, 0.92, 0.52, 0.03, "marble_counter", rot=vr, bevel=0.004)
-    sphere(n + "_basin", vx, vy, 0.9, 0.22, "porcelain", sx=1.0, sy=0.75, sz=0.32)
-    cyl(n + "_tap", vx + (0.0 if vr == 0 else 0.0), vy + (0.0), 0.87, 0.012, 0.32, "brass", "Decor", 12)
     ld = bpy.data.lights.new(n + "_fill", "POINT"); ld.energy = 45; ld.color = (1.0, 0.86, 0.7); ld.shadow_soft_size = 0.2
     lo_ = bpy.data.objects.new(n + "_fill", ld); lo_.location = ((x0 + x1) / 2, (y_n + y_s) / 2, H - 0.4); coll("Lights").objects.link(lo_)
-    if van_side == "S":
-        torus(n + "_mglow", vx, y_s + 0.014, 1.58, 0.31, 0.012, "led_soft", "Decor", rot=(90, 0, 0))
-        cyl(n + "_mrim", vx, y_s + 0.012, 1.58, 0.33, 0.02, "brass", "Decor", 64, rot=(90, 0, 0))
-        cyl(n + "_mir", vx, y_s + 0.016, 1.58, 0.31, 0.02, "mirror", "Decor", 64, rot=(90, 0, 0))
-    elif van_side == "W":
-        torus(n + "_mglow", x0 + 0.014, vy, 1.58, 0.31, 0.012, "led_soft", "Decor", rot=(0, 90, 0))
-        cyl(n + "_mrim", x0 + 0.012, vy, 1.58, 0.33, 0.02, "brass", "Decor", 64, rot=(0, 90, 0))
-        cyl(n + "_mir", x0 + 0.016, vy, 1.58, 0.31, 0.02, "mirror", "Decor", 64, rot=(0, 90, 0))
-    else:
-        cyl(n + "_mrim", x1 - 0.032, vy, 1.58, 0.33, 0.02, "brass", "Decor", 64, rot=(0, 90, 0))
-        cyl(n + "_mir", x1 - 0.036, vy, 1.58, 0.31, 0.02, "mirror", "Decor", 64, rot=(0, 90, 0))
 bathroom("T1", 192, 172, 365, 288, "N", "W")
 bathroom("T2", 935, 172, 1047, 378, "W", "S")
 bathroom("T3", 325, 564, 437, 745, "E", "S")
-for n, (a, b, c_) in {"T3": (330, 437, 660), "T2": (940, 1047, 250)}.items():
-    box(n + "_glass", X(a), Y(c_) - 0.005, 0, X(b), Y(c_) + 0.005, 2.1, "glass", "Decor")
-    box(n + "_glassfr", X(a), Y(c_) - 0.01, 2.1, X(b), Y(c_) + 0.01, 2.13, "black_metal", "Decor")
-cyl("T1_rain", X(220), Y(200), H - 0.25, 0.15, 0.01, "chrome", "Decor", 32)
 for (px, py) in [(278, 230), (990, 300), (380, 690), (990, 210), (230, 230), (380, 610)]:
     spot(px, py, H - 0.04, 30)
 
 # ============================================================== BALCONY (continuous)
-asset("Bal_chairA", "SheenChair.glb", X(745), Y(105), -0.03, rot=180, recolor={"fabric": ((0.62, 0.58, 0.50), 0.9)}, collide=True)
-asset("Bal_chairB", "SheenChair.glb", X(820), Y(105), -0.03, rot=180, recolor={"fabric": ((0.62, 0.58, 0.50), 0.9)}, collide=True)
+# sit-out: two lounge chairs angled toward the forest across a travertine side table
+asset("Bal_chairA", "SheenChair.glb", X(730), Y(100), -0.03, rot=125, recolor={"fabric": ((0.62, 0.58, 0.50), 0.9)}, collide=True)
+asset("Bal_chairB", "SheenChair.glb", X(834), Y(100), -0.03, rot=-125, recolor={"fabric": ((0.62, 0.58, 0.50), 0.9)}, collide=True)
 cyl("Bal_table", X(782), Y(110), -0.03, 0.22, 0.5, "travertine", "Furniture", 40, collide=True)
-asset("Bal_lantern", "GlassHurricaneCandleHolder.glb", X(782), Y(110), 0.47, scale=1.2)
 for i, px in enumerate([150, 470, 640, 1000, 1150, 1290]):
     asset(f"Bal_plant{i}", "DiffuseTransmissionPlant.glb", X(px), Y(62), -0.03, rot=40 * i, scale=1.6, recolor={"base": ((0.22, 0.21, 0.20), 0.8)}, collide=True)
 for i, px in enumerate([250, 600, 900, 1200]):
     cyl(f"Bal_downlight{i}", X(px), Y(100), H + 0.14, 0.04, 0.01, "led_soft", "Exterior", 16)
 
-# ============================================================== EXTERIOR backdrop (the project's own landscape renders)
-import bmesh
-me = bpy.data.meshes.new("Backdrop"); bmb = bmesh.new()
-R_, zb, zt, segs = 26.0, -3.15, 11.0, 120
-cxB, cyB = X(700), Y(450)
-ring_lo = [bmb.verts.new((cxB + R_ * math.cos(2 * math.pi * i / segs), cyB + R_ * math.sin(2 * math.pi * i / segs), zb)) for i in range(segs)]
-ring_hi = [bmb.verts.new((cxB + R_ * math.cos(2 * math.pi * i / segs), cyB + R_ * math.sin(2 * math.pi * i / segs), zt)) for i in range(segs)]
-uvl = bmb.loops.layers.uv.new("UVMap")
-for i in range(segs):
-    j = (i + 1) % segs
-    f = bmb.faces.new([ring_lo[j], ring_lo[i], ring_hi[i], ring_hi[j]])
-    for l, uvv in zip(f.loops, [((i + 1) / segs * 1.5, 0), (i / segs * 1.5, 0), (i / segs * 1.5, 1), ((i + 1) / segs * 1.5, 1)]):
-        l[uvl].uv = uvv
-bmb.to_mesh(me); bmb.free()
-ob = bpy.data.objects.new("Backdrop", me); ob.data.materials.append(MATS["backdrop"]); coll("Exterior").objects.link(ob)
-mat("lawn", (0.10, 0.20, 0.07), rough=1.0)
-box("Ground", cxB - 30, cyB - 30, -3.2, cxB + 30, cyB + 30, -3.1, "lawn", "Exterior")
+# ============================================================== REALISM PASS (fans, ACs, bathrooms, kitchen, sit-out)
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures_v2.py")).read())
 
 # ============================================================== LIGHTS + WORLD + RENDER DEFAULTS
 for i, (x, y, z, w) in enumerate(SPOTS):
@@ -707,6 +667,16 @@ try:
     sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(24); sky.sun_rotation = math.radians(205); sky.sun_disc = False
 except Exception: pass
 nt.links.new(sky.outputs[0], bg.inputs[0]); bg.inputs[1].default_value = 0.6
+# what you see through the glass: the Turahalli forest render (forest_v2.py), seen by camera rays only,
+# so the interior is still lit by the same sky and sun as before
+FOREST = os.path.join(ROOT, "textures", "forest_env.exr")
+if os.path.exists(FOREST):
+    env = nt.nodes.new("ShaderNodeTexEnvironment"); env.image = bpy.data.images.load(FOREST)
+    bgF = nt.nodes.new("ShaderNodeBackground"); bgF.inputs[1].default_value = 0.8
+    nt.links.new(env.outputs[0], bgF.inputs[0])
+    lp = nt.nodes.new("ShaderNodeLightPath"); mixw = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(lp.outputs["Is Camera Ray"], mixw.inputs[0]); nt.links.new(bg.outputs[0], mixw.inputs[1]); nt.links.new(bgF.outputs[0], mixw.inputs[2])
+    nt.links.new(mixw.outputs[0], nt.nodes["World Output"].inputs["Surface"])
 sd = bpy.data.lights.new("Sun", "SUN"); sd.energy = 3.0; sd.angle = math.radians(1.5); sd.color = (1.0, 0.9, 0.78)
 so = bpy.data.objects.new("Sun", sd); coll("Lights").objects.link(so); so.rotation_euler = (math.radians(66), 0, math.radians(205))
 # window portals to guide daylight sampling
@@ -751,6 +721,7 @@ meta = {"scale_px_per_m": S, "ceiling": H,
             "Bath 3": [X(325), Y(745), X(437), Y(564)], "Entrance": [X(1150), Y(583), X(1550), Y(462)],
             "Balcony": [X(55), Y(160), X(1313), Y(40)], "Master Balcony": [X(55), Y(288), X(180), Y(160)]},
         "spots": [[round(s[0], 3), round(s[1], 3)] for s in SPOTS],
+        "steam": [round(v, 3) for v in STEAM_AT],
         # floor heights of the entrance landing and steps (metres): x0, y0, x1, y1, z
         "levels": [[round(a, 3), round(YS, 3), round(b, 3), round(YN, 3), z] for (a, b, z) in LEVELS]}
 with open(os.path.join(ROOT, "layout.json"), "w") as f:

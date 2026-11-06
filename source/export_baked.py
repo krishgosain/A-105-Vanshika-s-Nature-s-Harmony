@@ -5,8 +5,8 @@ ROOT = "/home/claude/house/build2"; OUT = "/home/claude/house/site/model"
 bpy.ops.wm.open_mainfile(filepath=os.path.join(ROOT, "A105_baked.blend"))
 sc = bpy.context.scene
 for o in list(bpy.data.objects):
-    if o.type == 'LIGHT' or o.type == 'CAMERA':
-        bpy.data.objects.remove(o, do_unlink=True)
+    if o.type == 'LIGHT' or o.type == 'CAMERA' or any(c.name == "FX" for c in o.users_collection):
+        bpy.data.objects.remove(o, do_unlink=True)      # the walk draws its own steam
 # live (unbaked) dense meshes: decimate for the web
 for o in bpy.data.objects:
     if o.type == 'MESH' and o.name not in ("BakedA", "BakedV") and len(o.data.polygons) > 6000:

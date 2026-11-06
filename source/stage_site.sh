@@ -12,7 +12,7 @@ im.save('site/pano/$n.jpg',quality=86,optimize=True,progressive=True)
 im.resize((1536,768),Image.LANCZOS).save('site/pano/${n}_s.jpg',quality=80,optimize=True,progressive=True)"
   fi
 done
-for h in hero_living hero_dining hero_master hero_kitchen; do [ -f $F/$h.jpg ] && python3 -c "
+for h in hero_living hero_dining hero_master hero_kitchen hero_balcony; do [ -f $F/$h.jpg ] && python3 -c "
 from PIL import Image; Image.open('$F/$h.jpg').convert('RGB').save('site/img/$h.jpg',quality=86,optimize=True,progressive=True)"; done
 [ -f $F/plan.jpg ] && python3 -c "
 from PIL import Image; Image.open('$F/plan.jpg').convert('RGB').resize((1540,810),Image.LANCZOS).save('site/img/plan.jpg',quality=86,optimize=True)"

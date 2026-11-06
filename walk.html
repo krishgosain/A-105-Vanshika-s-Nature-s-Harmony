@@ -52,7 +52,7 @@ h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(2.
 <canvas id="view" aria-label="First-person view of Residence A-105"></canvas>
 <div id="room" class="hud" aria-live="polite"><div class="k">Residence A-105</div><div class="name">Entrance</div><div class="size">Outside the front door</div></div>
 <div id="tools" class="hud"><a class="btn" href="index.html">360° tour</a></div>
-<div id="map" class="hud"><img src="img/plan.jpg?v=4" alt="Plan of A-105 showing your position"><div id="cone"></div><div id="dot"></div></div>
+<div id="map" class="hud"><img src="img/plan.jpg?v=5" alt="Plan of A-105 showing your position"><div id="cone"></div><div id="dot"></div></div>
 <div id="jump" class="hud" aria-label="Jump to a room"></div>
 <div id="help" class="hud">WASD or arrows to move · drag or click to look · Shift to walk faster</div>
 <div id="stick"><div id="knob"></div></div>
@@ -92,7 +92,11 @@ renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = Math
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0xd9e3e8);
 const pmrem = new THREE.PMREMGenerator(renderer);
 const camera = new THREE.PerspectiveCamera(70, 1, 0.08, 300);
-const V = "?v=5";
+const V = "?v=6";
+// the view out of every window: the Turahalli forest, rendered from the balcony with the same tone mapping
+// as the 360 tour, on a far sphere that travels with the camera
+const sky = new THREE.Mesh(new THREE.SphereGeometry(250, 96, 48), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, toneMapped: false, depthWrite: false, color: 0xd9e3e8 }));
+sky.geometry.scale(-1, 1, 1); sky.rotation.y = Math.PI; sky.renderOrder = -1; scene.add(sky);
 const texLoader = new THREE.TextureLoader();
 // reflections: the rendered 360 of the living room, so polished surfaces mirror the real interior
 const envReady = new Promise(res => texLoader.load("pano/living_s.jpg" + V, t => {
@@ -107,6 +111,19 @@ const loadLightmap = url => new Promise((res, rej) => texLoader.load(url + V, t 
 const lightmapsReady = Promise.all([loadLightmap("model/lightmap.jpg"), loadLightmap("model/lightmapV.jpg")]);
 
 let colliders = [], rooms = {}, levels = [], ready = false;
+const fans = [], puffs = [];
+// steam rising from the coffee on the balcony: soft sprites that drift up, widen and fade
+function makeSteam([sx, sy, sz]) {
+  const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+  const grd = g.createRadialGradient(32, 32, 2, 32, 32, 30); grd.addColorStop(0, "rgba(255,255,255,0.9)"); grd.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
+  const tex = new THREE.CanvasTexture(c);
+  for (let i = 0; i < 14; i++) {
+    const m = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0 });
+    const sp = new THREE.Sprite(m); sp.userData = { t: i / 14, x: sx, y: sz, z: -sy, ph: Math.random() * 6.28 };
+    scene.add(sp); puffs.push(sp);
+  }
+}
 const player = { x: 0, y: 0, z: 0, yaw: Math.PI, pitch: 0, eye: 1.6, r: 0.22 };
 function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener("resize", resize); resize();
@@ -118,8 +135,10 @@ Promise.all([
   fetch("model/layout.json" + V).then(r => r.json()),
   fetch("model/bake.json" + V).then(r => r.json()),
   lightmapsReady, envReady,
+  new Promise(res => texLoader.load("img/forest.jpg" + V, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+    sky.material.map = t; sky.material.color.set(0xffffff); sky.material.needsUpdate = true; res(); }, undefined, () => res())),
   new Promise((res, rej) => gl.load("model/a105.glb" + V, res, ev => { if (ev.total) go.textContent = `Loading the home… ${Math.round(100 * ev.loaded / ev.total)}%`; }, rej))
-]).then(([lay, bake, [lightmapA, lightmapV], _env, gltf]) => {
+]).then(([lay, bake, [lightmapA, lightmapV], _env, _sky, gltf]) => {
   colliders = lay.colliders; rooms = lay.rooms; levels = lay.levels || [];
   // stored value x range = Cycles diffuse light; x pi turns it into irradiance
   const scale = bake.lmax * Math.PI;
@@ -137,6 +156,8 @@ Promise.all([
       if (/^sheer/i.test(m.name || "")) { m.emissive = new THREE.Color(0xf3eadc); m.emissiveIntensity = 0.7; m.opacity = 0.62; }
       // polished granite reflects the white passage walls in Cycles; damp the living-room reflections there
       if (/^granite/i.test(m.name || "")) m.envMapIntensity = 0.22;
+      // dark polished stone and lacquer would mirror the living room everywhere; keep their reflections faint
+      if (/^(marble_nero|lacquer_black|screen|ceramic_black|switch_glass)/i.test(m.name || "")) m.envMapIntensity = 0.12;
       m.aoMap = null;   // Cycles ignores the models' glTF occlusion maps, so the walk does too
       if (!kind || !o.geometry.getAttribute("uv1")) continue;
       m.lightMap = kind === "A" ? lightmapA : lightmapV; m.lightMapIntensity = scale;
@@ -147,6 +168,8 @@ Promise.all([
     o.material = Array.isArray(o.material) ? mats : mats[0];
   });
   scene.add(gltf.scene);
+  gltf.scene.traverse(o => { if (/^FanRot/.test(o.name)) fans.push(o); });
+  if (lay.steam) makeSteam(lay.steam);
   teleport(JUMPS[0]); fromHash(); buildJumps(); ready = true;
   go.disabled = false; go.textContent = "Enter the home";
 }).catch(err => { go.textContent = "The home didn't load. Reload the page to try again."; console.error(err); });
@@ -225,6 +248,15 @@ function tick(now) {
     dot.style.left = cone.style.left = mx + "px"; dot.style.top = cone.style.top = my + "px";
     cone.style.transform = `rotate(${90 - player.yaw * 180 / Math.PI}deg)`;
   }
+  for (const f of fans) f.rotateY(-dt * 4.2);
+  for (const p of puffs) {
+    const u = p.userData; u.t = (u.t + dt / 3.2) % 1;
+    const k = u.t, w = Math.sin(k * 5 + u.ph) * 0.012 * (0.3 + k);
+    p.position.set(u.x + w, u.y + 0.015 + k * 0.26, u.z + Math.cos(k * 4 + u.ph) * 0.008 * (0.3 + k));
+    const sc = 0.025 + k * 0.09; p.scale.set(sc, sc * 1.4, 1);
+    p.material.opacity = 0.32 * Math.sin(Math.PI * k) * (1 - k * 0.4);
+  }
+  sky.position.copy(camera.position);
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }

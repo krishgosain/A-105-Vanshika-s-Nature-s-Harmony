@@ -141,7 +141,7 @@ h1 em { font-style: italic; color: var(--gold); }
 </div>
 <nav id="rooms" class="hud" hidden aria-label="Rooms"></nav>
 <div id="plan" class="hud" hidden>
-  <div class="wrap" id="planWrap"><img src="img/plan.jpg?v=4" alt="Top-down plan of A-105"><div id="cone"></div></div>
+  <div class="wrap" id="planWrap"><img src="img/plan.jpg?v=5" alt="Top-down plan of A-105"><div id="cone"></div></div>
   <div class="lbl"><span>Type 5 · 3BHK + Family</span><span>2,011 sq ft</span></div>
 </div>
 <div id="hint" class="hud" hidden>Drag to look around · tap the rings to move</div>
@@ -153,10 +153,11 @@ h1 em { font-style: italic; color: var(--gold); }
 </aside>
 
 <section id="intro">
-  <div class="slide on" style="background-image:url(img/hero_living.jpg?v=3)"></div>
-  <div class="slide" style="background-image:url(img/hero_dining.jpg)"></div>
-  <div class="slide" style="background-image:url(img/hero_master.jpg)"></div>
-  <div class="slide" style="background-image:url(img/hero_kitchen.jpg)"></div>
+  <div class="slide on" style="background-image:url(img/hero_living.jpg?v=4)"></div>
+  <div class="slide" style="background-image:url(img/hero_dining.jpg?v=4)"></div>
+  <div class="slide" style="background-image:url(img/hero_master.jpg?v=4)"></div>
+  <div class="slide" style="background-image:url(img/hero_kitchen.jpg?v=4)"></div>
+  <div class="slide" style="background-image:url(img/hero_balcony.jpg?v=4)"></div>
   <div class="intro-body">
     <div class="eyebrow">Vanshika's Nature's Harmony · Bengaluru</div>
     <h1>Residence <em>A&#8209;105</em></h1>
@@ -199,10 +200,10 @@ const NODES = {
              text: "A charcoal channel-tufted headboard wall with an ivory gallery panel above, a bouclé bench and linen drapes that soften the light from the balcony." },
   master:  { px: 300, py: 470, name: "Master Bedroom", size: "13.45 x 11.48 ft", yaw: 170,
              text: "Herringbone oak underfoot and a full-height velvet channel headboard. Bronze-glass wardrobes glow from within, and a cognac velvet reading chair sits by the private balcony." },
-  mbath:   { px: 300, py: 245, name: "Master Bath", size: "7.87 x 4.92 ft", yaw: 180,
-             text: "A Nero Marquina feature wall, a floating walnut vanity with a vessel basin, and brass fittings under a rain shower." },
+  mbath:   { px: 282, py: 258, name: "Master Bath", size: "7.87 x 4.92 ft", yaw: 105,
+             text: "A Nero Marquina feature wall, a wall-hung WC, a floating walnut vanity with a vessel basin, and a walk-in rain shower behind clear glass." },
   balcony: { px: 690, py: 110, name: "Balcony", size: "Full-length façade balcony", yaw: 0,
-             text: "One balcony runs the full length of the façade, connecting the master suite, Bedroom 3, the living room and Bedroom 2. Teak decking and frameless glass look over the landscaped garden." }
+             text: "One balcony runs the full length of the façade, connecting the master suite, Bedroom 3, the living room and Bedroom 2. A sit-out with morning coffee looks across the compound to the Turahalli forest." }
 };
 // hotspot links: target node, optional 'via' marker position (plan px) at the doorway
 // optional 4th value: floor height of the marker relative to this node's floor (metres)
@@ -244,7 +245,7 @@ function tex(url) {
   }, undefined, rej));
   return cache[url];
 }
-const V = "?v=4";
+const V = "?v=5";
 const small = id => `pano/${id}_s.jpg${V}`, big = id => `pano/${id}.jpg${V}`;
 
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 85 : 72; camera.updateProjectionMatrix(); fovBase = camera.fov; }

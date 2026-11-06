@@ -3,7 +3,7 @@
 import bpy, numpy as np, json, os, glob, ctypes, oidn
 from PIL import Image
 ROOT = "/home/claude/house/build2"; OUT = "/home/claude/house/site/model"
-LMAX = 6.0
+LMAX = 10.0   # headroom for sun patches through the north glazing
 lib = ctypes.CDLL(sorted(glob.glob(os.path.join(os.path.dirname(oidn.__file__), "lib.linux.x64", "libOpenImageDenoise.so*")))[0])
 set1b = lib.oidnSetFilter1b; set1b.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_bool]; set1b.restype = None
 

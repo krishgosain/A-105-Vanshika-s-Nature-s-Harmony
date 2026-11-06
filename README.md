@@ -8,6 +8,14 @@ A photoreal 360° tour and real-time walkthrough of flat A-105, a Type 5, 3BHK +
 - `blender/A105_Luxury_Vanshikas_Type5.blend`: the editable scene, with textures packed in.
 - `source/`: the Blender Python scripts that build, render, bake (`bake_v2.py`, `encode_lightmap.py`) and export (`export_baked.py`) the scene.
 
+## What's in the home
+
+- Ceiling fans (walnut blades) in the living room, family and dining area, and all three bedrooms. The blades turn in the free walk.
+- A split AC in each of those rooms.
+- Bathrooms laid out as on the plan. Each has a wall-hung WC with health faucet, a vessel basin on a floating vanity, a walk-in rain shower behind glass with hand shower and niche, an exhaust fan, towels and a mat.
+- Kitchen fridge (north-east corner, per the plan), utility sink, dining place settings and switch plates by the doors.
+- The view from the balcony and every window is a rendered panorama of a forested hill, in the style of the Turahalli forest beyond the compound (`source/forest_v2.py`). The balcony sit-out has a cup of coffee that steams.
+
 The walls are traced to scale from the published Type 5 unit plan. The furnishing is a luxury design concept.
 
 Third-party models come from the Khronos glTF Sample Assets and are licensed CC BY 4.0: GlamVelvetSofa and SheenChair © Wayfair, DiffuseTransmissionPlant © DGG, plus glassware.
