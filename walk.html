@@ -92,7 +92,7 @@ renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = Math
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0xd9e3e8);
 const pmrem = new THREE.PMREMGenerator(renderer);
 const camera = new THREE.PerspectiveCamera(70, 1, 0.08, 300);
-const V = "?v=6";
+const V = "?v=7";
 // the view out of every window: the Turahalli forest, rendered from the balcony with the same tone mapping
 // as the 360 tour, on a far sphere that travels with the camera
 const sky = new THREE.Mesh(new THREE.SphereGeometry(250, 96, 48), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, toneMapped: false, depthWrite: false, color: 0xd9e3e8 }));
